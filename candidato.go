@@ -2,7 +2,6 @@ package talenthub
 
 import (
 	"context"
-	"fmt"
 	"net/mail"
 	"net/url"
 )
@@ -23,16 +22,16 @@ type Candidato struct {
 
 func (c *Candidato) validate() error {
 	if c.Name == "" {
-		return fmt.Errorf("name required")
+		return Errorf(EINVALID, "name required")
 	}
 	if _, err := mail.ParseAddress(c.Email); err != nil {
-		return fmt.Errorf("email invalid")
+		return Errorf(EINVALID, "email invalid")
 	}
 	if c.CPF == "" {
-		return fmt.Errorf("cpf required")
+		return Errorf(EINVALID, "cpf required")
 	}
 	if c.Phone == "" {
-		return fmt.Errorf("phone required")
+		return Errorf(EINVALID, "phone required")
 	}
 
 	return nil

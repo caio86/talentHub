@@ -2,7 +2,6 @@ package talenthub
 
 import (
 	"context"
-	"fmt"
 	"time"
 )
 
@@ -22,10 +21,10 @@ type Vaga struct {
 
 func (v *Vaga) Validate() error {
 	if v.Name == "" {
-		return fmt.Errorf("name required")
+		return Errorf(EINVALID, "name required")
 	}
 	if v.Description == "" {
-		return fmt.Errorf("description required")
+		return Errorf(EINVALID, "description required")
 	}
 
 	return nil
