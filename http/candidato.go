@@ -22,7 +22,7 @@ func (h *candidatoHandler) loadRoutes(r *http.ServeMux) {
 	r.HandleFunc("GET /candidato/{id}", h.get)
 	r.HandleFunc("GET /candidato", h.list)
 	r.HandleFunc("POST /candidato", h.create)
-	r.HandleFunc("PATCH /candidato/{id}", h.update)
+	r.HandleFunc("PUT /candidato/{id}", h.update)
 }
 
 type listResponse struct {
