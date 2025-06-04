@@ -20,8 +20,9 @@ func Error(w http.ResponseWriter, r *http.Request, err error) {
 }
 
 var codes = map[string]int{
-	talenthub.EINVALID:  http.StatusBadRequest,
-	talenthub.EINTERNAL: http.StatusInternalServerError,
+	talenthub.EINVALID:        http.StatusBadRequest,
+	talenthub.EINTERNAL:       http.StatusInternalServerError,
+	talenthub.ENOTIMPLEMENTED: http.StatusNotImplemented,
 }
 
 func ErrorStatusCode(code string) int {

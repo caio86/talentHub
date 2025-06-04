@@ -6,8 +6,9 @@ import (
 )
 
 const (
-	EINVALID  = "invalid"
-	EINTERNAL = "internal"
+	EINVALID        = "invalid"
+	EINTERNAL       = "internal"
+	ENOTIMPLEMENTED = "not_implemented"
 )
 
 type Error struct {
