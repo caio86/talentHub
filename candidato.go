@@ -7,17 +7,17 @@ import (
 )
 
 type Candidato struct {
-	ID    int
-	Name  string
-	Email string
-	CPF   string
-	Phone string
+	ID    int    `json:"-"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	CPF   string `json:"cpf"`
+	Phone string `json:"phone"`
 	// Experiencas
 	// Formação
 
-	Vaga string
+	Vaga string `json:"-"`
 
-	LinkCurriculo *url.URL
+	LinkCurriculo *url.URL `json:"-"`
 }
 
 func (c *Candidato) validate() error {

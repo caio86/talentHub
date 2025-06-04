@@ -6,17 +6,17 @@ import (
 )
 
 type Vaga struct {
-	ID          int
-	Name        string
-	Description string
+	ID          int    `json:"-"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 
-	Open bool
+	Open bool `json:"open"`
 	// Localidade
 	// Tipo
 	// AreaAtuação
 
-	CreatedAt time.Time
-	ExpiredAt time.Time
+	CreatedAt time.Time `json:"-"`
+	ExpiresAt time.Time `json:"-"`
 }
 
 func (v *Vaga) Validate() error {
