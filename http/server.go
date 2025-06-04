@@ -1,10 +1,16 @@
 package http
 
-import "net/http"
+import (
+	"net/http"
+
+	talenthub "github.com/caio86/talentHub"
+)
 
 type Server struct {
 	server *http.Server
 	router *http.ServeMux
+
+	CandidatoService talenthub.CandidatoService
 }
 
 func NewServer() *Server {
@@ -12,6 +18,12 @@ func NewServer() *Server {
 		server: &http.Server{},
 		router: http.NewServeMux(),
 	}
+
+	s.server.Handler = s.router
+
+	newCandidatoHandler(
+		s.CandidatoService,
+	).loadRoutes(s.router)
 
 	return s
 }
