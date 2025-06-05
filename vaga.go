@@ -33,6 +33,7 @@ func (v *Vaga) Validate() error {
 type VagaService interface {
 	FindVagaByID(ctx context.Context, id int) (*Vaga, error)
 	FindVagas(ctx context.Context, filter VagaFilter) ([]*Vaga, int, error)
+	CreateVaga(ctx context.Context, vaga *Vaga) error
 	UpdateVaga(ctx context.Context, id int, upd VagaUpdate) (*Vaga, error)
 	OpenVaga(ctx context.Context, id int) error
 	CloseVaga(ctx context.Context, id int) error
