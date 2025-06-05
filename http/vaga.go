@@ -68,6 +68,8 @@ func (s *Server) handleVagaCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(vaga)
 }
 
@@ -90,5 +92,7 @@ func (s *Server) handleVagaUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusAccepted)
 	json.NewEncoder(w).Encode(updated)
 }

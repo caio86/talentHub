@@ -10,7 +10,7 @@ import (
 
 func (s *Server) loadCandidatoRoutes(r *http.ServeMux) {
 	r.HandleFunc("GET /candidato/{id}", s.handleCandidatoGet)
-	r.HandleFunc("GET /candidato", s.handleCandidatosList)
+	r.HandleFunc("GET /candidato", s.handleCandidatoList)
 	r.HandleFunc("POST /candidato", s.handleCandidatoCreate)
 	r.HandleFunc("PUT /candidato/{id}", s.handleCandidatoUpdate)
 }
@@ -40,7 +40,7 @@ func (s *Server) handleCandidatoGet(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) handleCandidatosList(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleCandidatoList(w http.ResponseWriter, r *http.Request) {
 	var filter talenthub.CandidatoFilter
 
 	candidates, total, err := s.CandidatoService.FindCandidatos(r.Context(), filter)
@@ -70,6 +70,8 @@ func (s *Server) handleCandidatoCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(candidato)
 }
 
@@ -92,5 +94,7 @@ func (s *Server) handleCandidatoUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusAccepted)
 	json.NewEncoder(w).Encode(updated)
 }
