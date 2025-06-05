@@ -20,7 +20,7 @@ type listResponse struct {
 	Total      int                    `json:"total"`
 }
 
-func (h *Server) handleCandidatoGet(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleCandidatoGet(w http.ResponseWriter, r *http.Request) {
 	ids := r.PathValue("id")
 	id, err := strconv.Atoi(ids)
 	if err != nil {
@@ -28,7 +28,7 @@ func (h *Server) handleCandidatoGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	candidate, err := h.CandidatoService.FindCandidatoByID(r.Context(), id)
+	candidate, err := s.CandidatoService.FindCandidatoByID(r.Context(), id)
 	if err != nil {
 		Error(w, r, err)
 		return
