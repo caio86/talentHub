@@ -21,9 +21,8 @@ func NewServer() *Server {
 
 	s.server.Handler = s.router
 
-	newCandidatoHandler(
-		s.CandidatoService,
-	).loadRoutes(s.router)
+	// Loading routes
+	s.loadCandidatoRoutes(s.router)
 
 	return s
 }
