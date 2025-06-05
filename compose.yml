@@ -24,4 +24,4 @@ volumes:
   db-data:
 secrets:
   db-password:
-    file: psql-password
+    file: db/password
