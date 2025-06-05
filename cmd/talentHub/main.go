@@ -17,8 +17,10 @@ func main() {
 
 	// Setting services
 	candidatosService := postgres.NewCandidatoService()
+	vagaService := postgres.NewVagaService()
 
 	svr.CandidatoService = candidatosService
+	svr.VagaService = vagaService
 
 	log.Printf("listening: port=%d", port)
 	if err := svr.Open(); err != nil {

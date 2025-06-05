@@ -12,7 +12,9 @@ type Server struct {
 
 	Addr string
 
+	// Services
 	CandidatoService talenthub.CandidatoService
+	VagaService      talenthub.VagaService
 }
 
 func NewServer() *Server {
@@ -25,6 +27,7 @@ func NewServer() *Server {
 
 	// Loading routes
 	s.loadCandidatoRoutes(s.router)
+	s.loadVagaRoutes(s.router)
 
 	return s
 }
