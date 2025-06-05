@@ -23,11 +23,17 @@ func NewServer() *Server {
 		router: http.NewServeMux(),
 	}
 
-	s.server.Handler = s.router
-
 	// Loading routes
 	s.loadCandidatoRoutes(s.router)
 	s.loadVagaRoutes(s.router)
+
+	middlewares := createMiddlewares(
+		logging,
+	)
+
+	router := middlewares(s.router)
+
+	s.server.Handler = router
 
 	return s
 }
