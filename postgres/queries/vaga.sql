@@ -12,17 +12,19 @@ SELECT *
 INSERT INTO vagas (
   name       ,
   description,
+  open       ,
   created_at ,
   expires_at
-) VALUES ( $1, $2, $3, $4 )
+) VALUES ( $1, $2, $3, $4, $5 )
   RETURNING *;
 
 -- name: UpdateVaga :one
 UPDATE vagas
   SET name        = $2,
       description = $3,
-      created_at  = $4,
-      expires_at  = $5
+      open        = $4,
+      created_at  = $5,
+      expires_at  = $6
   WHERE id = $1
   RETURNING *;
 

@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS vagas (
   id bigint PRIMARY KEY GENERATED ALWAYS as IDENTITY,
   name varchar(80) NOT NULL,
   description text NOT NULL,
+  open boolean NOT NULL DEFAULT false,
   created_at timestamp NOT NULL DEFAULT NOW(),
   expires_at timestamp NOT NULL DEFAULT NOW() + '1 month'::interval
 );

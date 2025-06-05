@@ -14,15 +14,17 @@ const createVaga = `-- name: CreateVaga :one
 INSERT INTO vagas (
   name       ,
   description,
+  open       ,
   created_at ,
   expires_at
-) VALUES ( $1, $2, $3, $4 )
-  RETURNING id, name, description, created_at, expires_at
+) VALUES ( $1, $2, $3, $4, $5 )
+  RETURNING id, name, description, open, created_at, expires_at
 `
 
 type CreateVagaParams struct {
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
+	Open        bool      `json:"open"`
 	CreatedAt   time.Time `json:"created_at"`
 	ExpiresAt   time.Time `json:"expires_at"`
 }
@@ -31,6 +33,7 @@ func (q *Queries) CreateVaga(ctx context.Context, arg CreateVagaParams) (Vaga, e
 	row := q.db.QueryRow(ctx, createVaga,
 		arg.Name,
 		arg.Description,
+		arg.Open,
 		arg.CreatedAt,
 		arg.ExpiresAt,
 	)
@@ -39,6 +42,7 @@ func (q *Queries) CreateVaga(ctx context.Context, arg CreateVagaParams) (Vaga, e
 		&i.ID,
 		&i.Name,
 		&i.Description,
+		&i.Open,
 		&i.CreatedAt,
 		&i.ExpiresAt,
 	)
@@ -56,7 +60,7 @@ func (q *Queries) DeleteVaga(ctx context.Context, id int64) error {
 }
 
 const getVaga = `-- name: GetVaga :one
-SELECT id, name, description, created_at, expires_at
+SELECT id, name, description, open, created_at, expires_at
   FROM vagas
   WHERE id = $1 LIMIT 1
 `
@@ -68,6 +72,7 @@ func (q *Queries) GetVaga(ctx context.Context, id int64) (Vaga, error) {
 		&i.ID,
 		&i.Name,
 		&i.Description,
+		&i.Open,
 		&i.CreatedAt,
 		&i.ExpiresAt,
 	)
@@ -75,7 +80,7 @@ func (q *Queries) GetVaga(ctx context.Context, id int64) (Vaga, error) {
 }
 
 const listVagas = `-- name: ListVagas :many
-SELECT id, name, description, created_at, expires_at FROM vagas
+SELECT id, name, description, open, created_at, expires_at FROM vagas
   LIMIT $1
   OFFSET $2
 `
@@ -98,6 +103,7 @@ func (q *Queries) ListVagas(ctx context.Context, arg ListVagasParams) ([]Vaga, e
 			&i.ID,
 			&i.Name,
 			&i.Description,
+			&i.Open,
 			&i.CreatedAt,
 			&i.ExpiresAt,
 		); err != nil {
@@ -115,16 +121,18 @@ const updateVaga = `-- name: UpdateVaga :one
 UPDATE vagas
   SET name        = $2,
       description = $3,
-      created_at  = $4,
-      expires_at  = $5
+      open        = $4,
+      created_at  = $5,
+      expires_at  = $6
   WHERE id = $1
-  RETURNING id, name, description, created_at, expires_at
+  RETURNING id, name, description, open, created_at, expires_at
 `
 
 type UpdateVagaParams struct {
 	ID          int64     `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
+	Open        bool      `json:"open"`
 	CreatedAt   time.Time `json:"created_at"`
 	ExpiresAt   time.Time `json:"expires_at"`
 }
@@ -134,6 +142,7 @@ func (q *Queries) UpdateVaga(ctx context.Context, arg UpdateVagaParams) (Vaga, e
 		arg.ID,
 		arg.Name,
 		arg.Description,
+		arg.Open,
 		arg.CreatedAt,
 		arg.ExpiresAt,
 	)
@@ -142,6 +151,7 @@ func (q *Queries) UpdateVaga(ctx context.Context, arg UpdateVagaParams) (Vaga, e
 		&i.ID,
 		&i.Name,
 		&i.Description,
+		&i.Open,
 		&i.CreatedAt,
 		&i.ExpiresAt,
 	)

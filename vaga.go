@@ -49,4 +49,5 @@ type VagaFilter struct {
 type VagaUpdate struct {
 	Name        string
 	Description string
+	Open        bool
 }
