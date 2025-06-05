@@ -15,7 +15,7 @@ func (s *Server) loadCandidatoRoutes(r *http.ServeMux) {
 	r.HandleFunc("PUT /candidato/{id}", s.handleCandidatoUpdate)
 }
 
-type listResponse struct {
+type listCandidatoResponse struct {
 	Candidatos []*talenthub.Candidato `json:"candidatos"`
 	Total      int                    `json:"total"`
 }
@@ -50,7 +50,7 @@ func (s *Server) handleCandidatosList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(listResponse{
+	json.NewEncoder(w).Encode(listCandidatoResponse{
 		Candidatos: candidates,
 		Total:      total,
 	})
