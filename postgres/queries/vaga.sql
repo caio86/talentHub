@@ -23,8 +23,7 @@ UPDATE vagas
   SET name        = $2,
       description = $3,
       open        = $4,
-      created_at  = $5,
-      expires_at  = $6
+      expires_at  = $5
   WHERE id = $1
   RETURNING *;
 

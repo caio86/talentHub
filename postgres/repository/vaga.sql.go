@@ -122,8 +122,7 @@ UPDATE vagas
   SET name        = $2,
       description = $3,
       open        = $4,
-      created_at  = $5,
-      expires_at  = $6
+      expires_at  = $5
   WHERE id = $1
   RETURNING id, name, description, open, created_at, expires_at
 `
@@ -133,7 +132,6 @@ type UpdateVagaParams struct {
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Open        bool      `json:"open"`
-	CreatedAt   time.Time `json:"created_at"`
 	ExpiresAt   time.Time `json:"expires_at"`
 }
 
@@ -143,7 +141,6 @@ func (q *Queries) UpdateVaga(ctx context.Context, arg UpdateVagaParams) (Vaga, e
 		arg.Name,
 		arg.Description,
 		arg.Open,
-		arg.CreatedAt,
 		arg.ExpiresAt,
 	)
 	var i Vaga
