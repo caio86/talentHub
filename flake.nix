@@ -25,6 +25,9 @@
             gofumpt
             impl
             gomodifytags
+
+            sqlc
+            go-migrate
           ];
         };
       });
