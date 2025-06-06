@@ -38,7 +38,7 @@ func main() {
 	}
 
 	// Setting services
-	candidatosService := postgres.NewCandidatoService()
+	candidatosService := postgres.NewCandidatoService(conn)
 	vagaService := postgres.NewVagaService(conn)
 
 	svr.CandidatoService = candidatosService
