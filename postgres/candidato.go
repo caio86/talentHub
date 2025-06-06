@@ -5,7 +5,6 @@ import (
 
 	talenthub "github.com/caio86/talentHub"
 	"github.com/caio86/talentHub/postgres/repository"
-	"github.com/jackc/pgx/v5"
 )
 
 var _ talenthub.CandidatoService = (*CandidatoService)(nil)
@@ -14,8 +13,8 @@ type CandidatoService struct {
 	repo *repository.Queries
 }
 
-func NewCandidatoService(conn *pgx.Conn) *CandidatoService {
-	return &CandidatoService{repository.New(conn)}
+func NewCandidatoService(db *DB) *CandidatoService {
+	return &CandidatoService{repository.New(db.conn)}
 }
 
 func (s *CandidatoService) FindCandidatoByID(ctx context.Context, id int) (*talenthub.Candidato, error) {

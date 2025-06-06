@@ -5,22 +5,20 @@ import (
 
 	talenthub "github.com/caio86/talentHub"
 	"github.com/caio86/talentHub/postgres/repository"
-	"github.com/jackc/pgx/v5"
 )
 
 var _ talenthub.VagaService = (*VagaService)(nil)
 
 type VagaService struct {
-	conn *pgx.Conn
+	repo *repository.Queries
 }
 
-func NewVagaService(conn *pgx.Conn) *VagaService {
-	return &VagaService{conn: conn}
+func NewVagaService(db *DB) *VagaService {
+	return &VagaService{repository.New(db.conn)}
 }
 
 func (s *VagaService) FindVagaByID(ctx context.Context, id int) (*talenthub.Vaga, error) {
-	repo := repository.New(s.conn)
-	result, err := repo.GetVaga(ctx, int64(id))
+	result, err := s.repo.GetVaga(ctx, int64(id))
 	if err != nil {
 		return nil, err
 	}
@@ -38,13 +36,12 @@ func (s *VagaService) FindVagaByID(ctx context.Context, id int) (*talenthub.Vaga
 }
 
 func (s *VagaService) FindVagas(ctx context.Context, filter talenthub.VagaFilter) ([]*talenthub.Vaga, int, error) {
-	repo := repository.New(s.conn)
 	var arg repository.ListVagasParams
 
 	arg.Limit = int32(filter.Limit)
 	arg.Offset = int32(filter.Offset)
 
-	result, err := repo.ListVagas(ctx, arg)
+	result, err := s.repo.ListVagas(ctx, arg)
 	if err != nil {
 		return nil, 0, talenthub.Errorf(talenthub.EINTERNAL, "internal server error: %s", err)
 	}
@@ -65,7 +62,6 @@ func (s *VagaService) FindVagas(ctx context.Context, filter talenthub.VagaFilter
 }
 
 func (s *VagaService) CreateVaga(ctx context.Context, vaga *talenthub.Vaga) error {
-	repo := repository.New(s.conn)
 	arg := repository.CreateVagaParams{
 		Name:        vaga.Name,
 		Description: vaga.Description,
@@ -74,7 +70,7 @@ func (s *VagaService) CreateVaga(ctx context.Context, vaga *talenthub.Vaga) erro
 		ExpiresAt:   vaga.CreatedAt,
 	}
 
-	_, err := repo.CreateVaga(ctx, arg)
+	_, err := s.repo.CreateVaga(ctx, arg)
 	if err != nil {
 		return err
 	}
@@ -83,14 +79,13 @@ func (s *VagaService) CreateVaga(ctx context.Context, vaga *talenthub.Vaga) erro
 }
 
 func (s *VagaService) UpdateVaga(ctx context.Context, id int, upd talenthub.VagaUpdate) (*talenthub.Vaga, error) {
-	repo := repository.New(s.conn)
 	arg := repository.UpdateVagaParams{
 		Name:        upd.Name,
 		Description: upd.Description,
 		Open:        upd.Open,
 	}
 
-	updated, err := repo.UpdateVaga(ctx, arg)
+	updated, err := s.repo.UpdateVaga(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
