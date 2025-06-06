@@ -46,7 +46,7 @@ func (s *VagaService) FindVagas(ctx context.Context, filter talenthub.VagaFilter
 
 	result, err := repo.ListVagas(ctx, arg)
 	if err != nil {
-		return nil, 0, err
+		return nil, 0, talenthub.Errorf(talenthub.EINTERNAL, "internal server error: %s", err)
 	}
 
 	res := make([]*talenthub.Vaga, len(result))
