@@ -11,12 +11,12 @@ INSERT INTO vagas (
   name,
   description
 ) VALUES
-  ("Banco de Talentos", "reserva"),
-  ("T1", "descT1"),
-  ("T2", "descT2"),
-  ("T3", "descT3"),
-  ("T4", "descT4"),
-  ("T5", "descT5"),
-  ("T6", "descT6"),
-  ("T7", "descT7"),
-  ("T8", "descT8");
+  ('Banco de Talentos', 'reserva'),
+  ('T1', 'descT1'),
+  ('T2', 'descT2'),
+  ('T3', 'descT3'),
+  ('T4', 'descT4'),
+  ('T5', 'descT5'),
+  ('T6', 'descT6'),
+  ('T7', 'descT7'),
+  ('T8', 'descT8');
