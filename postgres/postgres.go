@@ -2,11 +2,19 @@ package postgres
 
 import (
 	"context"
+	"embed"
 	"fmt"
+	"log"
 
 	talenthub "github.com/caio86/talentHub"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/jackc/pgx/v5"
 )
+
+//go:embed migrations/*.sql
+var migrations embed.FS
 
 type DBConfig struct {
 	User     string
@@ -75,6 +83,31 @@ func (db *DB) Connect() error {
 	}
 
 	db.conn = conn
+
+	if err := db.runMigrations(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *DB) runMigrations() error {
+	log.Printf("running migrations")
+	url := db.URL()
+
+	source, err := iofs.New(migrations, "migrations")
+	if err != nil {
+		return talenthub.Errorf(talenthub.EINTERNAL, "could not create migration source: %s", err)
+	}
+
+	m, err := migrate.NewWithSourceInstance("iofs", source, url)
+	if err != nil {
+		return talenthub.Errorf(talenthub.EINTERNAL, "could not create migration from source: %s", err)
+	}
+
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		return talenthub.Errorf(talenthub.EINTERNAL, "failed to run migrations: %s", err)
+	}
 
 	return nil
 }
