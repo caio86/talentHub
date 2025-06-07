@@ -20,6 +20,14 @@ type listCandidatoResponse struct {
 	Total      int                    `json:"total"`
 }
 
+// @summary Get Candidato By ID
+// @description Get Candidato By ID
+// @router /candidato/{id} [get]
+// @tags Candidatos
+// @produce json
+// @param id path int true "Candidato ID"
+// @success 200 {object} talenthub.Candidato "Candidato achado"
+// @success 404 {object} http.ErrorResponse "Mensagem de error"
 func (s *Server) handleCandidatoGet(w http.ResponseWriter, r *http.Request) {
 	ids := r.PathValue("id")
 	id, err := strconv.Atoi(ids)
@@ -40,6 +48,15 @@ func (s *Server) handleCandidatoGet(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @summary Lista Candidatos
+// @description Lista Candidatos
+// @router /candidato [get]
+// @tags Candidatos
+// @produce json
+// @param limit query int false "Pagination limit"
+// @param offset query int false "Pagination offset"
+// @success 200 {object} http.listCandidatoResponse "Lista de candidatos"
+// @success 404 {object} http.ErrorResponse "Mensagem de erro"
 func (s *Server) handleCandidatoList(w http.ResponseWriter, r *http.Request) {
 	var filter talenthub.CandidatoFilter
 
@@ -56,6 +73,15 @@ func (s *Server) handleCandidatoList(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// @summary Create candidato
+// @description Create candidato
+// @router /candidato [post]
+// @tags Candidatos
+// @accept json
+// @produce json
+// @param candidato body talenthub.Candidato true "Candidato a ser criado"
+// @success 201 {object} talenthub.Candidato "Candidato criado"
+// @success 404 {object} http.ErrorResponse "Mensagem de erro"
 func (s *Server) handleCandidatoCreate(w http.ResponseWriter, r *http.Request) {
 	var candidato talenthub.Candidato
 
@@ -75,6 +101,16 @@ func (s *Server) handleCandidatoCreate(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(candidato)
 }
 
+// @summary Update candidato
+// @description Update candidato
+// @router /candidato [put]
+// @tags Candidatos
+// @accept json
+// @produce json
+// @param id path int true "Candidato ID"
+// @param candidato body talenthub.CandidatoUpdate true "Dados de candidatos para atualizar"
+// @success 202 {object} talenthub.Candidato "Candidato atualizado"
+// @success 404 {object} http.ErrorResponse "Mensagem de erro"
 func (s *Server) handleCandidatoUpdate(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {

@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	talenthub "github.com/caio86/talentHub"
+	_ "github.com/caio86/talentHub/docs"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type Server struct {
@@ -17,6 +19,9 @@ type Server struct {
 	VagaService      talenthub.VagaService
 }
 
+// @title talentHub API
+// @version 1.0
+// @basepath /api/v1
 func NewServer() *Server {
 	s := &Server{
 		server: &http.Server{},
@@ -30,6 +35,8 @@ func NewServer() *Server {
 	s.loadVagaRoutes(router)
 
 	s.router.Handle("/api/v1/", http.StripPrefix("/api/v1", router))
+	s.router.Handle("/swagger/", httpSwagger.WrapHandler)
+
 	// Setting middlewares
 	middlewares := createMiddlewares(
 		s.logging,

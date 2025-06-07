@@ -19,15 +19,9 @@
           packages = with pkgs; [
             go_1_24
 
-            gopls
-
-            gotools # goimports
-            gofumpt
-            impl
-            gomodifytags
-
             sqlc
             go-migrate
+            go-swag
           ];
         };
       });

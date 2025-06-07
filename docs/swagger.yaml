@@ -1,0 +1,139 @@
+basePath: /api/v1
+definitions:
+  http.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  http.listCandidatoResponse:
+    properties:
+      candidatos:
+        items:
+          $ref: '#/definitions/talenthub.Candidato'
+        type: array
+      total:
+        type: integer
+    type: object
+  talenthub.Candidato:
+    properties:
+      cpf:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    type: object
+  talenthub.CandidatoUpdate:
+    type: object
+info:
+  contact: {}
+  title: talentHub API
+  version: "1.0"
+paths:
+  /candidato:
+    get:
+      description: Lista Candidatos
+      parameters:
+      - description: Pagination limit
+        in: query
+        name: limit
+        type: integer
+      - description: Pagination offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lista de candidatos
+          schema:
+            $ref: '#/definitions/http.listCandidatoResponse'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Lista Candidatos
+      tags:
+      - Candidatos
+    post:
+      consumes:
+      - application/json
+      description: Create candidato
+      parameters:
+      - description: Candidato a ser criado
+        in: body
+        name: candidato
+        required: true
+        schema:
+          $ref: '#/definitions/talenthub.Candidato'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Candidato criado
+          schema:
+            $ref: '#/definitions/talenthub.Candidato'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Create candidato
+      tags:
+      - Candidatos
+    put:
+      consumes:
+      - application/json
+      description: Update candidato
+      parameters:
+      - description: Candidato ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Dados de candidatos para atualizar
+        in: body
+        name: candidato
+        required: true
+        schema:
+          $ref: '#/definitions/talenthub.CandidatoUpdate'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Candidato atualizado
+          schema:
+            $ref: '#/definitions/talenthub.Candidato'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Update candidato
+      tags:
+      - Candidatos
+  /candidato/{id}:
+    get:
+      description: Get Candidato By ID
+      parameters:
+      - description: Candidato ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Candidato achado
+          schema:
+            $ref: '#/definitions/talenthub.Candidato'
+        "404":
+          description: Mensagem de error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Get Candidato By ID
+      tags:
+      - Candidatos
+swagger: "2.0"
