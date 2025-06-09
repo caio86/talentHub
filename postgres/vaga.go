@@ -38,12 +38,25 @@ func (s *VagaService) FindVagaByID(ctx context.Context, id int) (*talenthub.Vaga
 func (s *VagaService) FindVagas(ctx context.Context, filter talenthub.VagaFilter) ([]*talenthub.Vaga, int, error) {
 	var arg repository.ListVagasParams
 
-	arg.Limit = int32(filter.Limit)
-	arg.Offset = int32(filter.Offset)
+	arg.Limit = filter.Limit
+	arg.Offset = filter.Offset * arg.Limit
 
-	result, err := s.repo.ListVagas(ctx, arg)
+	total, err := s.repo.CountVagas(ctx)
 	if err != nil {
-		return nil, 0, talenthub.Errorf(talenthub.EINTERNAL, "internal server error: %s", err)
+		return nil, 0, err
+	}
+
+	var result []repository.Vaga
+	if arg.Limit == 0 {
+		result, err = s.repo.ListAllVagas(ctx)
+		if err != nil {
+			return nil, 0, talenthub.Errorf(talenthub.EINTERNAL, "internal server error: %s", err)
+		}
+	} else {
+		result, err = s.repo.ListVagas(ctx, arg)
+		if err != nil {
+			return nil, 0, talenthub.Errorf(talenthub.EINTERNAL, "internal server error: %s", err)
+		}
 	}
 
 	res := make([]*talenthub.Vaga, len(result))
@@ -58,7 +71,7 @@ func (s *VagaService) FindVagas(ctx context.Context, filter talenthub.VagaFilter
 		}
 	}
 
-	return res, len(res), nil
+	return res, int(total), nil
 }
 
 func (s *VagaService) CreateVaga(ctx context.Context, vaga *talenthub.Vaga) error {

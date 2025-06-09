@@ -10,6 +10,17 @@ import (
 	"time"
 )
 
+const countVagas = `-- name: CountVagas :one
+SELECT count(*) FROM vagas
+`
+
+func (q *Queries) CountVagas(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countVagas)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createVaga = `-- name: CreateVaga :one
 INSERT INTO vagas (
   name       ,
@@ -77,6 +88,37 @@ func (q *Queries) GetVaga(ctx context.Context, id int64) (Vaga, error) {
 		&i.ExpiresAt,
 	)
 	return i, err
+}
+
+const listAllVagas = `-- name: ListAllVagas :many
+SELECT id, name, description, open, created_at, expires_at FROM vagas
+`
+
+func (q *Queries) ListAllVagas(ctx context.Context) ([]Vaga, error) {
+	rows, err := q.db.Query(ctx, listAllVagas)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Vaga
+	for rows.Next() {
+		var i Vaga
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Description,
+			&i.Open,
+			&i.CreatedAt,
+			&i.ExpiresAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listVagas = `-- name: ListVagas :many

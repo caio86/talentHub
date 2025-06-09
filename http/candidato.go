@@ -74,7 +74,30 @@ func (s *Server) handleCandidatoGet(w http.ResponseWriter, r *http.Request) {
 // @success 200 {object} http.listCandidatoResponse "Lista de candidatos"
 // @success 404 {object} http.ErrorResponse "Mensagem de erro"
 func (s *Server) handleCandidatoList(w http.ResponseWriter, r *http.Request) {
+	queryParams := r.URL.Query()
 	var filter talenthub.CandidatoFilter
+
+	if res := queryParams.Get("offset"); res == "" {
+		filter.Offset = 0
+	} else {
+		offset, err := strconv.ParseUint(res, 10, 32)
+		filter.Offset = int32(offset)
+		if err != nil {
+			Error(w, r, talenthub.Errorf(talenthub.EINVALID, "invalid page param"))
+			return
+		}
+	}
+
+	if res := queryParams.Get("limit"); res == "" {
+		filter.Limit = 0
+	} else {
+		limit, err := strconv.ParseUint(res, 10, 32)
+		filter.Limit = int32(limit)
+		if err != nil {
+			Error(w, r, talenthub.Errorf(talenthub.EINVALID, "invalid limit param"))
+			return
+		}
+	}
 
 	candidates, total, err := s.CandidatoService.FindCandidatos(r.Context(), filter)
 	if err != nil {

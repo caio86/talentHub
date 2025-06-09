@@ -9,6 +9,17 @@ import (
 	"context"
 )
 
+const countCandidatos = `-- name: CountCandidatos :one
+SELECT count(*) FROM candidatos
+`
+
+func (q *Queries) CountCandidatos(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countCandidatos)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createCandidato = `-- name: CreateCandidato :one
 INSERT INTO candidatos (
 	name ,
@@ -71,6 +82,36 @@ func (q *Queries) GetCandidato(ctx context.Context, id int64) (Candidato, error)
 		&i.Phone,
 	)
 	return i, err
+}
+
+const listAllCandidatos = `-- name: ListAllCandidatos :many
+SELECT id, name, email, cpf, phone FROM candidatos
+`
+
+func (q *Queries) ListAllCandidatos(ctx context.Context) ([]Candidato, error) {
+	rows, err := q.db.Query(ctx, listAllCandidatos)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Candidato
+	for rows.Next() {
+		var i Candidato
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Email,
+			&i.Cpf,
+			&i.Phone,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listCandidatos = `-- name: ListCandidatos :many

@@ -3,6 +3,12 @@ SELECT * FROM candidatos
   LIMIT $1
   OFFSET $2;
 
+-- name: ListAllCandidatos :many
+SELECT * FROM candidatos;
+
+-- name: CountCandidatos :one
+SELECT count(*) FROM candidatos;
+
 -- name: GetCandidato :one
 SELECT *
   FROM candidatos

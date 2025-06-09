@@ -73,7 +73,30 @@ func (s *Server) handleVagaGet(w http.ResponseWriter, r *http.Request) {
 // @success 200 {object} http.listVagaResponse "Lista de vagas"
 // @success 404 {object} http.ErrorResponse "Mensagem de erro"
 func (s *Server) handleVagaList(w http.ResponseWriter, r *http.Request) {
+	queryParams := r.URL.Query()
 	var filter talenthub.VagaFilter
+
+	if res := queryParams.Get("offset"); res == "" {
+		filter.Offset = 0
+	} else {
+		offset, err := strconv.ParseUint(res, 10, 32)
+		filter.Offset = int32(offset)
+		if err != nil {
+			Error(w, r, talenthub.Errorf(talenthub.EINVALID, "invalid page param"))
+			return
+		}
+	}
+
+	if res := queryParams.Get("limit"); res == "" {
+		filter.Limit = 0
+	} else {
+		limit, err := strconv.ParseUint(res, 10, 32)
+		filter.Limit = int32(limit)
+		if err != nil {
+			Error(w, r, talenthub.Errorf(talenthub.EINVALID, "invalid limit param"))
+			return
+		}
+	}
 
 	vagas, total, err := s.VagaService.FindVagas(r.Context(), filter)
 	if err != nil {

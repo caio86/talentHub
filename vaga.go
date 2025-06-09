@@ -42,8 +42,8 @@ type VagaService interface {
 type VagaFilter struct {
 	Open *bool
 
-	Offset int
-	Limit  int
+	Offset int32
+	Limit  int32
 }
 
 type VagaUpdate struct {

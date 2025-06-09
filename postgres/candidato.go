@@ -35,14 +35,28 @@ func (s *CandidatoService) FindCandidatoByID(ctx context.Context, id int) (*tale
 }
 
 func (s *CandidatoService) FindCandidatos(ctx context.Context, filter talenthub.CandidatoFilter) ([]*talenthub.Candidato, int, error) {
+	var err error
 	arg := repository.ListCandidatosParams{
-		Limit:  int32(filter.Limit),
-		Offset: int32(filter.Offset),
+		Limit:  filter.Limit,
+		Offset: filter.Offset * filter.Limit,
 	}
 
-	candidatos, err := s.repo.ListCandidatos(ctx, arg)
+	total, err := s.repo.CountCandidatos(ctx)
 	if err != nil {
 		return nil, 0, err
+	}
+
+	var candidatos []repository.Candidato
+	if arg.Limit == 0 {
+		candidatos, err = s.repo.ListAllCandidatos(ctx)
+		if err != nil {
+			return nil, 0, err
+		}
+	} else {
+		candidatos, err = s.repo.ListCandidatos(ctx, arg)
+		if err != nil {
+			return nil, 0, err
+		}
 	}
 
 	res := make([]*talenthub.Candidato, len(candidatos))
@@ -56,7 +70,7 @@ func (s *CandidatoService) FindCandidatos(ctx context.Context, filter talenthub.
 		}
 	}
 
-	return res, len(candidatos), nil
+	return res, int(total), nil
 }
 
 func (s *CandidatoService) CreateCandidato(ctx context.Context, candidato *talenthub.Candidato) error {

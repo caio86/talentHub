@@ -47,8 +47,8 @@ type CandidatoService interface {
 }
 
 type CandidatoFilter struct {
-	Offset int
-	Limit  int
+	Offset int32
+	Limit  int32
 }
 
 type CandidatoUpdate struct {

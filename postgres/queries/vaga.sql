@@ -3,6 +3,12 @@ SELECT * FROM vagas
   LIMIT $1
   OFFSET $2;
 
+-- name: ListAllVagas :many
+SELECT * FROM vagas;
+
+-- name: CountVagas :one
+SELECT count(*) FROM vagas;
+
 -- name: GetVaga :one
 SELECT *
   FROM vagas
