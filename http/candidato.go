@@ -15,9 +15,17 @@ func (s *Server) loadCandidatoRoutes(r *http.ServeMux) {
 	r.HandleFunc("PUT /candidato/{id}", s.handleCandidatoUpdate)
 }
 
+type candidatoDTO struct {
+	ID    int    `json:"-"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	CPF   string `json:"cpf"`
+	Phone string `json:"phone"`
+}
+
 type listCandidatoResponse struct {
-	Candidatos []*talenthub.Candidato `json:"candidatos"`
-	Total      int                    `json:"total"`
+	Candidatos []*candidatoDTO `json:"candidatos"`
+	Total      int             `json:"total"`
 }
 
 // @summary Get Candidato By ID
@@ -42,8 +50,16 @@ func (s *Server) handleCandidatoGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	res := &candidatoDTO{
+		ID:    candidate.ID,
+		Name:  candidate.Name,
+		Email: candidate.Email,
+		CPF:   candidate.CPF,
+		Phone: candidate.Phone,
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(candidate); err != nil {
+	if err := json.NewEncoder(w).Encode(res); err != nil {
 		return
 	}
 }
@@ -66,9 +82,20 @@ func (s *Server) handleCandidatoList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	res := make([]*candidatoDTO, len(candidates))
+	for k, v := range candidates {
+		res[k] = &candidatoDTO{
+			ID:    v.ID,
+			Name:  v.Name,
+			Email: v.Email,
+			CPF:   v.CPF,
+			Phone: v.Phone,
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(listCandidatoResponse{
-		Candidatos: candidates,
+		Candidatos: res,
 		Total:      total,
 	})
 }
@@ -83,14 +110,20 @@ func (s *Server) handleCandidatoList(w http.ResponseWriter, r *http.Request) {
 // @success 201 {object} talenthub.Candidato "Candidato criado"
 // @success 404 {object} http.ErrorResponse "Mensagem de erro"
 func (s *Server) handleCandidatoCreate(w http.ResponseWriter, r *http.Request) {
-	var candidato talenthub.Candidato
+	var candidato candidatoDTO
 
 	if err := json.NewDecoder(r.Body).Decode(&candidato); err != nil {
 		Error(w, r, talenthub.Errorf(talenthub.EINVALID, "invalid json body"))
 		return
 	}
 
-	err := s.CandidatoService.CreateCandidato(r.Context(), &candidato)
+	err := s.CandidatoService.CreateCandidato(r.Context(), &talenthub.Candidato{
+		ID:    candidato.ID,
+		Name:  candidato.Name,
+		Email: candidato.Email,
+		CPF:   candidato.CPF,
+		Phone: candidato.Phone,
+	})
 	if err != nil {
 		Error(w, r, err)
 		return
@@ -130,7 +163,15 @@ func (s *Server) handleCandidatoUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	res := &candidatoDTO{
+		ID:    updated.ID,
+		Name:  updated.Name,
+		Email: updated.Email,
+		CPF:   updated.CPF,
+		Phone: updated.Phone,
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
-	json.NewEncoder(w).Encode(updated)
+	json.NewEncoder(w).Encode(res)
 }

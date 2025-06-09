@@ -15,9 +15,25 @@ func (s *Server) loadVagaRoutes(r *http.ServeMux) {
 	r.HandleFunc("PUT /vaga/{id}", s.handleVagaUpdate)
 }
 
+type vagaDTO struct {
+	ID          int    `json:"-"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Open        bool   `json:"open"`
+}
+
+func (d *vagaDTO) toDomain() *talenthub.Vaga {
+	return &talenthub.Vaga{
+		ID:          d.ID,
+		Name:        d.Name,
+		Description: d.Description,
+		Open:        d.Open,
+	}
+}
+
 type listVagaResponse struct {
-	Vagas []*talenthub.Vaga `json:"vagas"`
-	Total int               `json:"total"`
+	Vagas []*vagaDTO `json:"vagas"`
+	Total int        `json:"total"`
 }
 
 func (s *Server) handleVagaGet(w http.ResponseWriter, r *http.Request) {
@@ -48,21 +64,33 @@ func (s *Server) handleVagaList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	res := make([]*vagaDTO, len(vagas))
+	for k, v := range vagas {
+		res[k] = &vagaDTO{
+			ID:          v.ID,
+			Name:        v.Name,
+			Description: v.Description,
+			Open:        v.Open,
+		}
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(listVagaResponse{
-		Vagas: vagas,
+		Vagas: res,
 		Total: total,
 	})
 }
 
 func (s *Server) handleVagaCreate(w http.ResponseWriter, r *http.Request) {
-	var vaga talenthub.Vaga
-	if err := json.NewDecoder(r.Body).Decode(&vaga); err != nil {
+	var vagadto *vagaDTO
+	if err := json.NewDecoder(r.Body).Decode(&vagadto); err != nil {
 		Error(w, r, talenthub.Errorf(talenthub.EINVALID, "invalid json body"))
 		return
 	}
 
-	err := s.VagaService.CreateVaga(r.Context(), &vaga)
+	vaga := vagadto.toDomain()
+
+	err := s.VagaService.CreateVaga(r.Context(), vaga)
 	if err != nil {
 		Error(w, r, err)
 		return
@@ -70,7 +98,7 @@ func (s *Server) handleVagaCreate(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(vaga)
+	json.NewEncoder(w).Encode(vagadto)
 }
 
 func (s *Server) handleVagaUpdate(w http.ResponseWriter, r *http.Request) {
@@ -92,7 +120,14 @@ func (s *Server) handleVagaUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	res := &vagaDTO{
+		ID:          updated.ID,
+		Name:        updated.Name,
+		Description: updated.Description,
+		Open:        updated.Open,
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
-	json.NewEncoder(w).Encode(updated)
+	json.NewEncoder(w).Encode(res)
 }
