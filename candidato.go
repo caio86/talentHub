@@ -57,5 +57,5 @@ type CandidatoUpdate struct {
 	CPF   string
 	Phone string
 
-	LinkCurriculo *url.URL
+	LinkCurriculo string
 }
