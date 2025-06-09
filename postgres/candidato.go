@@ -20,7 +20,7 @@ func NewCandidatoService(db *DB) *CandidatoService {
 func (s *CandidatoService) FindCandidatoByID(ctx context.Context, id int) (*talenthub.Candidato, error) {
 	result, err := s.repo.GetCandidato(ctx, int64(id))
 	if err != nil {
-		return nil, err
+		return nil, talenthub.Errorf(talenthub.ENOTFOUND, "candidato not found")
 	}
 
 	res := talenthub.Candidato{

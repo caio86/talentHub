@@ -22,6 +22,7 @@ func Error(w http.ResponseWriter, r *http.Request, err error) {
 var codes = map[string]int{
 	talenthub.EINVALID:        http.StatusBadRequest,
 	talenthub.EINTERNAL:       http.StatusInternalServerError,
+	talenthub.ENOTFOUND:       http.StatusNotFound,
 	talenthub.ENOTIMPLEMENTED: http.StatusNotImplemented,
 }
 

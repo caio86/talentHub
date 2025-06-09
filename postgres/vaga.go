@@ -20,7 +20,7 @@ func NewVagaService(db *DB) *VagaService {
 func (s *VagaService) FindVagaByID(ctx context.Context, id int) (*talenthub.Vaga, error) {
 	result, err := s.repo.GetVaga(ctx, int64(id))
 	if err != nil {
-		return nil, err
+		return nil, talenthub.Errorf(talenthub.ENOTFOUND, "vaga not found")
 	}
 
 	res := talenthub.Vaga{

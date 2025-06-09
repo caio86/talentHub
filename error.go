@@ -8,6 +8,7 @@ import (
 const (
 	EINVALID        = "invalid"
 	EINTERNAL       = "internal"
+	ENOTFOUND       = "not_found"
 	ENOTIMPLEMENTED = "not_implemented"
 )
 
