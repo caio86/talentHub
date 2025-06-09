@@ -22,6 +22,7 @@
             sqlc
             go-migrate
             go-swag
+            gnumake
           ];
         };
       });
