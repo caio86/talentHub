@@ -46,51 +46,6 @@
                     }
                 }
             },
-            "put": {
-                "description": "Update candidato",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Candidatos"
-                ],
-                "summary": "Update candidato",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Candidato ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Dados de candidatos para atualizar",
-                        "name": "candidato",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/talenthub.CandidatoUpdate"
-                        }
-                    }
-                ],
-                "responses": {
-                    "202": {
-                        "description": "Candidato atualizado",
-                        "schema": {
-                            "$ref": "#/definitions/talenthub.Candidato"
-                        }
-                    },
-                    "404": {
-                        "description": "Mensagem de erro",
-                        "schema": {
-                            "$ref": "#/definitions/http.ErrorResponse"
-                        }
-                    }
-                }
-            },
             "post": {
                 "description": "Create candidato",
                 "consumes": [
@@ -110,7 +65,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/talenthub.Candidato"
+                            "$ref": "#/definitions/http.candidatoDTO"
                         }
                     }
                 ],
@@ -118,7 +73,7 @@
                     "201": {
                         "description": "Candidato criado",
                         "schema": {
-                            "$ref": "#/definitions/talenthub.Candidato"
+                            "$ref": "#/definitions/http.candidatoDTO"
                         }
                     },
                     "404": {
@@ -153,11 +108,214 @@
                     "200": {
                         "description": "Candidato achado",
                         "schema": {
-                            "$ref": "#/definitions/talenthub.Candidato"
+                            "$ref": "#/definitions/http.candidatoDTO"
                         }
                     },
                     "404": {
                         "description": "Mensagem de error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update candidato",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Candidatos"
+                ],
+                "summary": "Update candidato",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Candidato ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Dados de candidatos para atualizar",
+                        "name": "candidato",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/talenthub.CandidatoUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Candidato atualizado",
+                        "schema": {
+                            "$ref": "#/definitions/http.candidatoDTO"
+                        }
+                    },
+                    "404": {
+                        "description": "Mensagem de erro",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/vaga": {
+            "get": {
+                "description": "Lista Vagas",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Vagas"
+                ],
+                "summary": "Lista Vagas",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Pagination limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Pagination offset",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de vagas",
+                        "schema": {
+                            "$ref": "#/definitions/http.listVagaResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Mensagem de erro",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create vaga",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Vagas"
+                ],
+                "summary": "Create vaga",
+                "parameters": [
+                    {
+                        "description": "Vaga a ser criada",
+                        "name": "candidato",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.vagaDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Vaga criada",
+                        "schema": {
+                            "$ref": "#/definitions/http.vagaDTO"
+                        }
+                    },
+                    "404": {
+                        "description": "Mensagem de erro",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/vaga/{id}": {
+            "get": {
+                "description": "Get Vaga By ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Vagas"
+                ],
+                "summary": "Get Vaga By ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Vaga ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Vaga achada",
+                        "schema": {
+                            "$ref": "#/definitions/http.vagaDTO"
+                        }
+                    },
+                    "404": {
+                        "description": "Mensagem de error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update candidato",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Vagas"
+                ],
+                "summary": "Update candidato",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Vaga ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Dados de vagas para atualizar",
+                        "name": "candidato",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/talenthub.VagaUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Vaga atualizada",
+                        "schema": {
+                            "$ref": "#/definitions/http.vagaDTO"
+                        }
+                    },
+                    "404": {
+                        "description": "Mensagem de erro",
                         "schema": {
                             "$ref": "#/definitions/http.ErrorResponse"
                         }
@@ -175,21 +333,7 @@
                 }
             }
         },
-        "http.listCandidatoResponse": {
-            "type": "object",
-            "properties": {
-                "candidatos": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/talenthub.Candidato"
-                    }
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "talenthub.Candidato": {
+        "http.candidatoDTO": {
             "type": "object",
             "properties": {
                 "cpf": {
@@ -206,8 +350,81 @@
                 }
             }
         },
+        "http.listCandidatoResponse": {
+            "type": "object",
+            "properties": {
+                "candidatos": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/http.candidatoDTO"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "http.listVagaResponse": {
+            "type": "object",
+            "properties": {
+                "total": {
+                    "type": "integer"
+                },
+                "vagas": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/http.vagaDTO"
+                    }
+                }
+            }
+        },
+        "http.vagaDTO": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "open": {
+                    "type": "boolean"
+                }
+            }
+        },
         "talenthub.CandidatoUpdate": {
-            "type": "object"
+            "type": "object",
+            "properties": {
+                "cpf": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "linkCurriculo": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "talenthub.VagaUpdate": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "open": {
+                    "type": "boolean"
+                }
+            }
         }
     }
 }

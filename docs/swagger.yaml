@@ -5,16 +5,7 @@ definitions:
       error:
         type: string
     type: object
-  http.listCandidatoResponse:
-    properties:
-      candidatos:
-        items:
-          $ref: '#/definitions/talenthub.Candidato'
-        type: array
-      total:
-        type: integer
-    type: object
-  talenthub.Candidato:
+  http.candidatoDTO:
     properties:
       cpf:
         type: string
@@ -25,7 +16,54 @@ definitions:
       phone:
         type: string
     type: object
+  http.listCandidatoResponse:
+    properties:
+      candidatos:
+        items:
+          $ref: '#/definitions/http.candidatoDTO'
+        type: array
+      total:
+        type: integer
+    type: object
+  http.listVagaResponse:
+    properties:
+      total:
+        type: integer
+      vagas:
+        items:
+          $ref: '#/definitions/http.vagaDTO'
+        type: array
+    type: object
+  http.vagaDTO:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      open:
+        type: boolean
+    type: object
   talenthub.CandidatoUpdate:
+    properties:
+      cpf:
+        type: string
+      email:
+        type: string
+      linkCurriculo:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    type: object
+  talenthub.VagaUpdate:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      open:
+        type: boolean
     type: object
 info:
   contact: {}
@@ -68,19 +106,42 @@ paths:
         name: candidato
         required: true
         schema:
-          $ref: '#/definitions/talenthub.Candidato'
+          $ref: '#/definitions/http.candidatoDTO'
       produces:
       - application/json
       responses:
         "201":
           description: Candidato criado
           schema:
-            $ref: '#/definitions/talenthub.Candidato'
+            $ref: '#/definitions/http.candidatoDTO'
         "404":
           description: Mensagem de erro
           schema:
             $ref: '#/definitions/http.ErrorResponse'
       summary: Create candidato
+      tags:
+      - Candidatos
+  /candidato/{id}:
+    get:
+      description: Get Candidato By ID
+      parameters:
+      - description: Candidato ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Candidato achado
+          schema:
+            $ref: '#/definitions/http.candidatoDTO'
+        "404":
+          description: Mensagem de error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Get Candidato By ID
       tags:
       - Candidatos
     put:
@@ -105,7 +166,7 @@ paths:
         "202":
           description: Candidato atualizado
           schema:
-            $ref: '#/definitions/talenthub.Candidato'
+            $ref: '#/definitions/http.candidatoDTO'
         "404":
           description: Mensagem de erro
           schema:
@@ -113,11 +174,62 @@ paths:
       summary: Update candidato
       tags:
       - Candidatos
-  /candidato/{id}:
+  /vaga:
     get:
-      description: Get Candidato By ID
+      description: Lista Vagas
       parameters:
-      - description: Candidato ID
+      - description: Pagination limit
+        in: query
+        name: limit
+        type: integer
+      - description: Pagination offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lista de vagas
+          schema:
+            $ref: '#/definitions/http.listVagaResponse'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Lista Vagas
+      tags:
+      - Vagas
+    post:
+      consumes:
+      - application/json
+      description: Create vaga
+      parameters:
+      - description: Vaga a ser criada
+        in: body
+        name: candidato
+        required: true
+        schema:
+          $ref: '#/definitions/http.vagaDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Vaga criada
+          schema:
+            $ref: '#/definitions/http.vagaDTO'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Create vaga
+      tags:
+      - Vagas
+  /vaga/{id}:
+    get:
+      description: Get Vaga By ID
+      parameters:
+      - description: Vaga ID
         in: path
         name: id
         required: true
@@ -126,14 +238,44 @@ paths:
       - application/json
       responses:
         "200":
-          description: Candidato achado
+          description: Vaga achada
           schema:
-            $ref: '#/definitions/talenthub.Candidato'
+            $ref: '#/definitions/http.vagaDTO'
         "404":
           description: Mensagem de error
           schema:
             $ref: '#/definitions/http.ErrorResponse'
-      summary: Get Candidato By ID
+      summary: Get Vaga By ID
       tags:
-      - Candidatos
+      - Vagas
+    put:
+      consumes:
+      - application/json
+      description: Update candidato
+      parameters:
+      - description: Vaga ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Dados de vagas para atualizar
+        in: body
+        name: candidato
+        required: true
+        schema:
+          $ref: '#/definitions/talenthub.VagaUpdate'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Vaga atualizada
+          schema:
+            $ref: '#/definitions/http.vagaDTO'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Update candidato
+      tags:
+      - Vagas
 swagger: "2.0"

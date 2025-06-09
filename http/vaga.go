@@ -36,6 +36,14 @@ type listVagaResponse struct {
 	Total int        `json:"total"`
 }
 
+// @summary Get Vaga By ID
+// @description Get Vaga By ID
+// @router /vaga/{id} [get]
+// @tags Vagas
+// @produce json
+// @param id path int true "Vaga ID"
+// @success 200 {object} http.vagaDTO "Vaga achada"
+// @success 404 {object} http.ErrorResponse "Mensagem de error"
 func (s *Server) handleVagaGet(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
@@ -55,6 +63,15 @@ func (s *Server) handleVagaGet(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// @summary Lista Vagas
+// @description Lista Vagas
+// @router /vaga [get]
+// @tags Vagas
+// @produce json
+// @param limit query int false "Pagination limit"
+// @param offset query int false "Pagination offset"
+// @success 200 {object} http.listVagaResponse "Lista de vagas"
+// @success 404 {object} http.ErrorResponse "Mensagem de erro"
 func (s *Server) handleVagaList(w http.ResponseWriter, r *http.Request) {
 	var filter talenthub.VagaFilter
 
@@ -81,6 +98,15 @@ func (s *Server) handleVagaList(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// @summary Create vaga
+// @description Create vaga
+// @router /vaga [post]
+// @tags Vagas
+// @accept json
+// @produce json
+// @param candidato body http.vagaDTO true "Vaga a ser criada"
+// @success 201 {object} http.vagaDTO "Vaga criada"
+// @success 404 {object} http.ErrorResponse "Mensagem de erro"
 func (s *Server) handleVagaCreate(w http.ResponseWriter, r *http.Request) {
 	var vagadto *vagaDTO
 	if err := json.NewDecoder(r.Body).Decode(&vagadto); err != nil {
@@ -101,6 +127,16 @@ func (s *Server) handleVagaCreate(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(vagadto)
 }
 
+// @summary Update candidato
+// @description Update candidato
+// @router /vaga/{id} [put]
+// @tags Vagas
+// @accept json
+// @produce json
+// @param id path int true "Vaga ID"
+// @param candidato body talenthub.VagaUpdate true "Dados de vagas para atualizar"
+// @success 202 {object} http.vagaDTO "Vaga atualizada"
+// @success 404 {object} http.ErrorResponse "Mensagem de erro"
 func (s *Server) handleVagaUpdate(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
