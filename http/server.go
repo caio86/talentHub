@@ -35,7 +35,7 @@ func NewServer() *Server {
 	s.loadVagaRoutes(router)
 
 	s.router.Handle("/api/v1/", http.StripPrefix("/api/v1", router))
-	s.router.Handle("/swagger/", httpSwagger.WrapHandler)
+	s.router.Handle("/api/v1/docs/", httpSwagger.WrapHandler)
 
 	// Setting middlewares
 	middlewares := createMiddlewares(
