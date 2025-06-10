@@ -1,0 +1,53 @@
+# Version control
+.git/
+.gitignore
+
+# IDE and editor configs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Go artifacts
+bin/                   # Compiled binaries
+dist/
+*.exe
+*.test
+*.prof
+coverage.out
+coverage.html
+
+# Dependency directories
+vendor/                # Only include if NOT using vendored dependencies
+pkg/                   # Go pkg directory
+
+# Build cache
+/go-build/            # Go build cache
+__debug_bin           # Delve debug binaries
+
+# Environment/config files
+.env
+*.env.local
+.env*.local
+
+# Documentation
+README.md
+CHANGELOG.md
+# docs/
+
+# Docker files (optional - include if not needed in build context)
+Dockerfile
+docker-compose*.yml    # Exclude all docker-compose files
+.dockerignore
+
+# Log files
+*.log
+logs/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Test artifacts
+/testdata/             # Exclude large test datasets
+/tmp/

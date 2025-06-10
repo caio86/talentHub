@@ -29,10 +29,27 @@ build-windows:
 run:
 	go run $(GO_PACKAGE)
 
+# Start postgres container
+db-up:
+	@if [ ! -f ./db/password ]; then\
+		mkdir db;\
+		echo "password" > ./db/password;\
+	fi
+	docker compose up -d db
+
+# Start api container
+up: db-up
+	-docker compose up --build api
+
+# Destroy all containers
+down:
+	docker compose down
+
 # Clean build artifacts
 clean:
 	go clean
 	rm -rf bin/ cover.out
+	docker compose down -v --rmi local
 
 # Run tests
 test:
@@ -68,6 +85,9 @@ help:
 	@echo "  build-darwin  - Build for macOS"
 	@echo "  build-windows - Build for Windows"
 	@echo "  run       - Run application directly"
+	@echo "  db-up     - Start db container"
+	@echo "  up        - Start app container"
+	@echo "  down      - Destroy all containers"
 	@echo "  clean     - Remove build artifacts"
 	@echo "  test      - Run tests"
 	@echo "  test-coverage - Run tests with coverage"
@@ -76,4 +96,4 @@ help:
 	@echo "  deps      - Download dependencies"
 	@echo "  help      - Show this help"
 
-.PHONY: all build build-linux build-darwin build-windows run clean test test-coverage fmt vet deps help
+.PHONY: all build build-linux build-darwin build-windows run clean test test-coverage fmt vet deps help db-up up down
