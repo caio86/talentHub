@@ -40,6 +40,7 @@ func NewServer() *Server {
 	// Setting middlewares
 	middlewares := createMiddlewares(
 		s.logging,
+		s.cors,
 	)
 
 	s.server.Handler = middlewares(s.router)
