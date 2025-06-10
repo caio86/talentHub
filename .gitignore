@@ -2,3 +2,5 @@
 db/password
 .env
 bin/
+cover.out
+cover.html

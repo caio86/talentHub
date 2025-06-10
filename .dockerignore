@@ -14,8 +14,8 @@ dist/
 *.exe
 *.test
 *.prof
-coverage.out
-coverage.html
+cover.out
+cover.html
 
 # Dependency directories
 vendor/                # Only include if NOT using vendored dependencies
