@@ -3,21 +3,23 @@ package talenthub
 import (
 	"context"
 	"net/mail"
-	"net/url"
 )
 
 type Candidato struct {
-	ID    int    `json:"-"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	CPF   string `json:"cpf"`
-	Phone string `json:"phone"`
-	// Experiencas
-	// Formação
+	ID       int
+	Name     string
+	Email    string
+	Password string
+	Phone    string
+	Address  string
+	Linkedin string
 
-	Vaga string `json:"-"`
+	Experiences []*Experience
+	Education   []*Education
+	Skills      []string
+	Interests   []string
 
-	LinkCurriculo *url.URL `json:"-"`
+	ResumeLink string
 }
 
 func (c *Candidato) validate() error {
@@ -27,11 +29,8 @@ func (c *Candidato) validate() error {
 	if _, err := mail.ParseAddress(c.Email); err != nil {
 		return Errorf(EINVALID, "email invalid")
 	}
-	if c.CPF == "" {
-		return Errorf(EINVALID, "cpf required")
-	}
-	if c.Phone == "" {
-		return Errorf(EINVALID, "phone required")
+	if c.Password == "" {
+		return Errorf(EINVALID, "password required")
 	}
 
 	return nil

@@ -6,22 +6,23 @@ import (
 )
 
 type Vaga struct {
-	ID          int    `json:"-"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	ID          int
+	Title       string
+	Description string
 
-	Open bool `json:"open"`
-	// Localidade
-	// Tipo
-	// AreaAtuação
+	IsActive bool `json:"IsActive"`
 
-	CreatedAt time.Time `json:"-"`
-	ExpiresAt time.Time `json:"-"`
+	Area         string
+	Type         string
+	Location     string
+	Requirements []string
+
+	Posted_date time.Time
 }
 
 func (v *Vaga) Validate() error {
-	if v.Name == "" {
-		return Errorf(EINVALID, "name required")
+	if v.Title == "" {
+		return Errorf(EINVALID, "title required")
 	}
 	if v.Description == "" {
 		return Errorf(EINVALID, "description required")
