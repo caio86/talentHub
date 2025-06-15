@@ -1,7 +1,7 @@
 package talenthub
 
 type Experience struct {
-	Id          int
+	ID          int
 	CandidateID int
 	Company     string
 	Role        string

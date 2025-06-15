@@ -10,7 +10,7 @@ type Vaga struct {
 	Title       string
 	Description string
 
-	IsActive bool `json:"IsActive"`
+	IsActive bool
 
 	Area         string
 	Type         string

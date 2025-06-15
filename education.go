@@ -1,7 +1,7 @@
 package talenthub
 
 type Education struct {
-	Id          int
+	ID          int
 	CandidateID int
 	Institution string
 	Course      string
