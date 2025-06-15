@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	talenthub "github.com/caio86/talentHub"
 )
@@ -15,26 +16,63 @@ func (s *Server) loadVagaRoutes(r *http.ServeMux) {
 	r.HandleFunc("PUT /vaga/{id}", s.handleVagaUpdate)
 }
 
+// DTO
+
 type vagaDTO struct {
-	ID          int    `json:"-"`
-	Name        string `json:"name"`
+	ID          int    `json:"id"`
+	Title       string `json:"title"`
 	Description string `json:"description"`
-	Open        bool   `json:"open"`
+
+	IsActive bool `json:"IsActive"`
+
+	Area         string   `json:"area"`
+	Type         string   `json:"type"`
+	Location     string   `json:"location"`
+	Requirements []string `json:"requirements"`
+
+	Posted_date time.Time `json:"posted_date"`
 }
+
+// DTO Helpers
 
 func (d *vagaDTO) toDomain() *talenthub.Vaga {
 	return &talenthub.Vaga{
 		ID:          d.ID,
-		Name:        d.Name,
+		Title:       d.Title,
 		Description: d.Description,
-		Open:        d.Open,
+
+		IsActive: d.IsActive,
+
+		Area:         d.Area,
+		Type:         d.Type,
+		Location:     d.Location,
+		Requirements: d.Requirements,
+
+		Posted_date: d.Posted_date,
 	}
+}
+
+func (d *vagaDTO) fromDomain(domain *talenthub.Vaga) {
+	d.ID = domain.ID
+	d.Title = domain.Title
+	d.Description = domain.Description
+
+	d.IsActive = domain.IsActive
+
+	d.Area = domain.Area
+	d.Type = domain.Type
+	d.Location = domain.Location
+	d.Requirements = domain.Requirements
+
+	d.Posted_date = domain.Posted_date
 }
 
 type listVagaResponse struct {
 	Vagas []*vagaDTO `json:"vagas"`
 	Total int        `json:"total"`
 }
+
+// HTTP Handlers
 
 // @summary Get Vaga By ID
 // @description Get Vaga By ID
@@ -57,8 +95,11 @@ func (s *Server) handleVagaGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var res vagaDTO
+	res.fromDomain(vaga)
+
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(vaga); err != nil {
+	if err := json.NewEncoder(w).Encode(res); err != nil {
 		return
 	}
 }
@@ -106,12 +147,7 @@ func (s *Server) handleVagaList(w http.ResponseWriter, r *http.Request) {
 
 	res := make([]*vagaDTO, len(vagas))
 	for k, v := range vagas {
-		res[k] = &vagaDTO{
-			ID:          v.ID,
-			Name:        v.Name,
-			Description: v.Description,
-			Open:        v.Open,
-		}
+		res[k].fromDomain(v)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -179,12 +215,8 @@ func (s *Server) handleVagaUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := &vagaDTO{
-		ID:          updated.ID,
-		Name:        updated.Name,
-		Description: updated.Description,
-		Open:        updated.Open,
-	}
+	var res vagaDTO
+	res.fromDomain(updated)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
