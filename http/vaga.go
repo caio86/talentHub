@@ -147,7 +147,9 @@ func (s *Server) handleVagaList(w http.ResponseWriter, r *http.Request) {
 
 	res := make([]*vagaDTO, len(vagas))
 	for k, v := range vagas {
-		res[k].fromDomain(v)
+		var dto vagaDTO
+		dto.fromDomain(v)
+		res[k] = &dto
 	}
 
 	w.Header().Set("Content-Type", "application/json")

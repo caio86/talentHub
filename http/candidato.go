@@ -209,7 +209,9 @@ func (s *Server) handleCandidatoList(w http.ResponseWriter, r *http.Request) {
 
 	res := make([]*candidatoDTO, len(candidates))
 	for k, v := range candidates {
-		res[k].fromDomain(v)
+		var dto candidatoDTO
+		dto.fromDomain(v)
+		res[k] = &dto
 	}
 
 	w.Header().Set("Content-Type", "application/json")
