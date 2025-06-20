@@ -238,15 +238,18 @@ func (s *Server) handleCandidatoCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := s.CandidatoService.CreateCandidato(r.Context(), candidato.toDomain())
+	newCandidato, err := s.CandidatoService.CreateCandidato(r.Context(), candidato.toDomain())
 	if err != nil {
 		Error(w, r, err)
 		return
 	}
 
+	var res candidatoDTO
+	res.fromDomain(newCandidato)
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(candidato)
+	json.NewEncoder(w).Encode(res)
 }
 
 // @summary Update candidato

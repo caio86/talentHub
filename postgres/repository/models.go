@@ -6,21 +6,88 @@ package repository
 
 import (
 	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Candidato struct {
-	ID    int64  `json:"id"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Cpf   string `json:"cpf"`
-	Phone string `json:"phone"`
+type Application struct {
+	ID              int32     `json:"id"`
+	CandidateID     int32     `json:"candidate_id"`
+	VacancyID       int32     `json:"vacancy_id"`
+	ApplicationDate time.Time `json:"application_date"`
+	Score           *int32    `json:"score"`
+	StatusID        *int32    `json:"status_id"`
 }
 
-type Vaga struct {
-	ID          int64     `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Open        bool      `json:"open"`
-	CreatedAt   time.Time `json:"created_at"`
-	ExpiresAt   time.Time `json:"expires_at"`
+type ApplicationStatus struct {
+	ID     int32  `json:"id"`
+	Status string `json:"status"`
+}
+
+type Candidate struct {
+	ID        int32   `json:"id"`
+	Name      string  `json:"name"`
+	Email     string  `json:"email"`
+	Password  string  `json:"password"`
+	Phone     *string `json:"phone"`
+	Address   *string `json:"address"`
+	Linkedin  *string `json:"linkedin"`
+	ResumeUrl *string `json:"resume_url"`
+}
+
+type CandidateInterest struct {
+	CandidateID int32  `json:"candidate_id"`
+	Interest    string `json:"interest"`
+}
+
+type CandidateSkill struct {
+	CandidateID int32  `json:"candidate_id"`
+	Skill       string `json:"skill"`
+}
+
+type Education struct {
+	ID          int32  `json:"id"`
+	CandidateID int32  `json:"candidate_id"`
+	Institution string `json:"institution"`
+	Course      string `json:"course"`
+	Level       string `json:"level"`
+}
+
+type EmploymentArea struct {
+	ID   int32  `json:"id"`
+	Name string `json:"name"`
+}
+
+type EmploymentType struct {
+	ID   int32  `json:"id"`
+	Name string `json:"name"`
+}
+
+type Experience struct {
+	ID          int32  `json:"id"`
+	CandidateID int32  `json:"candidate_id"`
+	Company     string `json:"company"`
+	Role        string `json:"role"`
+	Years       int32  `json:"years"`
+}
+
+type Requirement struct {
+	ID   int32  `json:"id"`
+	Name string `json:"name"`
+}
+
+type Vacancy struct {
+	ID          int32       `json:"id"`
+	Title       string      `json:"title"`
+	Description *string     `json:"description"`
+	IsActive    bool        `json:"is_active"`
+	AreaID      *int32      `json:"area_id"`
+	TypeID      *int32      `json:"type_id"`
+	Location    *string     `json:"location"`
+	PostedDate  pgtype.Date `json:"posted_date"`
+}
+
+type VacancyRequirement struct {
+	VacancyID     int32 `json:"vacancy_id"`
+	RequirementID int32 `json:"requirement_id"`
 }
