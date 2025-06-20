@@ -7,14 +7,60 @@ definitions:
     type: object
   http.candidatoDTO:
     properties:
-      cpf:
+      address:
         type: string
+      education:
+        items:
+          $ref: '#/definitions/http.education'
+        type: array
       email:
+        type: string
+      experience:
+        items:
+          $ref: '#/definitions/http.experience'
+        type: array
+      id:
+        type: integer
+      interests:
+        items:
+          type: string
+        type: array
+      linkedin:
         type: string
       name:
         type: string
+      password:
+        type: string
       phone:
         type: string
+      resume_pdf_path:
+        type: string
+      skills:
+        items:
+          type: string
+        type: array
+    type: object
+  http.education:
+    properties:
+      course:
+        type: string
+      education_id:
+        type: integer
+      institution:
+        type: string
+      level:
+        type: string
+    type: object
+  http.experience:
+    properties:
+      company:
+        type: string
+      experience_id:
+        type: integer
+      role:
+        type: string
+      years:
+        type: integer
     type: object
   http.listCandidatoResponse:
     properties:
@@ -36,24 +82,38 @@ definitions:
     type: object
   http.vagaDTO:
     properties:
+      IsActive:
+        type: boolean
+      area:
+        type: string
       description:
         type: string
-      name:
+      id:
+        type: integer
+      location:
         type: string
-      open:
-        type: boolean
+      posted_date:
+        type: string
+      requirements:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      type:
+        type: string
     type: object
   talenthub.CandidatoUpdate:
     properties:
-      cpf:
+      address:
         type: string
-      email:
-        type: string
-      linkCurriculo:
+      linkedin:
         type: string
       name:
         type: string
       phone:
+        type: string
+      resume_pdf_path:
         type: string
     type: object
   talenthub.VagaUpdate:

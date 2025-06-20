@@ -344,17 +344,87 @@ const docTemplate = `{
         "http.candidatoDTO": {
             "type": "object",
             "properties": {
-                "cpf": {
+                "address": {
                     "type": "string"
                 },
+                "education": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/http.education"
+                    }
+                },
                 "email": {
+                    "type": "string"
+                },
+                "experience": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/http.experience"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "interests": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "linkedin": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
+                "password": {
+                    "type": "string"
+                },
                 "phone": {
                     "type": "string"
+                },
+                "resume_pdf_path": {
+                    "type": "string"
+                },
+                "skills": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "http.education": {
+            "type": "object",
+            "properties": {
+                "course": {
+                    "type": "string"
+                },
+                "education_id": {
+                    "type": "integer"
+                },
+                "institution": {
+                    "type": "string"
+                },
+                "level": {
+                    "type": "string"
+                }
+            }
+        },
+        "http.experience": {
+            "type": "object",
+            "properties": {
+                "company": {
+                    "type": "string"
+                },
+                "experience_id": {
+                    "type": "integer"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "years": {
+                    "type": "integer"
                 }
             }
         },
@@ -389,33 +459,54 @@ const docTemplate = `{
         "http.vagaDTO": {
             "type": "object",
             "properties": {
+                "IsActive": {
+                    "type": "boolean"
+                },
+                "area": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
-                "name": {
+                "id": {
+                    "type": "integer"
+                },
+                "location": {
                     "type": "string"
                 },
-                "open": {
-                    "type": "boolean"
+                "posted_date": {
+                    "type": "string"
+                },
+                "requirements": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         },
         "talenthub.CandidatoUpdate": {
             "type": "object",
             "properties": {
-                "cpf": {
+                "address": {
                     "type": "string"
                 },
-                "email": {
-                    "type": "string"
-                },
-                "linkCurriculo": {
+                "linkedin": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
                 "phone": {
+                    "type": "string"
+                },
+                "resume_pdf_path": {
                     "type": "string"
                 }
             }
