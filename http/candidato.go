@@ -45,7 +45,7 @@ type candidatoDTO struct {
 	Skills      []string      `json:"skills"`
 	Interests   []string      `json:"interests"`
 
-	ResumeLink string `json:"resume_link,omitempty"`
+	ResumeLink string `json:"resume_pdf_path,omitempty"`
 }
 
 // DTO Helpers

@@ -56,5 +56,5 @@ type CandidatoUpdate struct {
 	Address  string `json:"address"`
 	Linkedin string `json:"linkedin"`
 
-	ResumeLink string `json:"resume_link"`
+	ResumeLink string `json:"resume_pdf_path"`
 }
