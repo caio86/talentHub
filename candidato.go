@@ -51,10 +51,10 @@ type CandidatoFilter struct {
 }
 
 type CandidatoUpdate struct {
-	Name     string `json:"name"`
-	Phone    string `json:"phone"`
-	Address  string `json:"address"`
-	Linkedin string `json:"linkedin"`
+	Name     *string `json:"name"`
+	Phone    *string `json:"phone"`
+	Address  *string `json:"address"`
+	Linkedin *string `json:"linkedin"`
 
-	ResumeLink string `json:"resume_pdf_path"`
+	ResumeLink *string `json:"resume_pdf_path"`
 }

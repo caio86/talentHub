@@ -326,18 +326,35 @@ func (s *CandidatoService) UnregisterCandidato(ctx context.Context, candidatoID,
 }
 
 func (s *CandidatoService) UpdateCandidato(ctx context.Context, id int, upd talenthub.CandidatoUpdate) (*talenthub.Candidato, error) {
-	_, err := s.repo.GetCandidateByID(ctx, int32(id))
+	candidato, err := s.repo.GetCandidateByID(ctx, int32(id))
 	if err != nil {
 		return nil, talenthub.Errorf(talenthub.ENOTFOUND, "candidato not found")
 	}
 
 	arg := repository.UpdateCandidateParams{
 		ID:        int32(id),
-		Name:      upd.Name,
-		Phone:     &upd.Phone,
-		Address:   &upd.Address,
-		Linkedin:  &upd.Linkedin,
-		ResumeUrl: &upd.ResumeLink,
+		Name:      candidato.Name,
+		Phone:     candidato.Phone,
+		Address:   candidato.Address,
+		Linkedin:  candidato.Linkedin,
+		ResumeUrl: candidato.ResumeUrl,
+	}
+
+	// Apply updates
+	if upd.Name != nil {
+		arg.Name = *upd.Name
+	}
+	if upd.Phone != nil {
+		arg.Phone = upd.Phone
+	}
+	if upd.Address != nil {
+		arg.Address = upd.Address
+	}
+	if upd.Linkedin != nil {
+		arg.Linkedin = upd.Linkedin
+	}
+	if upd.ResumeLink != nil {
+		arg.ResumeUrl = upd.ResumeLink
 	}
 
 	updated, err := s.repo.UpdateCandidate(ctx, arg)
