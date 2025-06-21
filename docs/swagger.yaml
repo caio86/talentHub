@@ -391,4 +391,50 @@ paths:
       summary: Update vaga
       tags:
       - Vagas
+  /vaga/close/{id}:
+    post:
+      description: Close vaga
+      parameters:
+      - description: Vaga ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: Vaga closed
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Close vaga
+      tags:
+      - Vagas
+  /vaga/open/{id}:
+    post:
+      description: Open vaga
+      parameters:
+      - description: Vaga ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: Vaga aberta
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Open vaga
+      tags:
+      - Vagas
 swagger: "2.0"

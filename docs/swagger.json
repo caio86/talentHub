@@ -279,6 +279,76 @@
                 }
             }
         },
+        "/vaga/close/{id}": {
+            "post": {
+                "description": "Close vaga",
+                "tags": [
+                    "Vagas"
+                ],
+                "summary": "Close vaga",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Vaga ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Vaga closed"
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Mensagem de erro",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/vaga/open/{id}": {
+            "post": {
+                "description": "Open vaga",
+                "tags": [
+                    "Vagas"
+                ],
+                "summary": "Open vaga",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Vaga ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Vaga aberta"
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Mensagem de erro",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/vaga/{id}": {
             "get": {
                 "description": "Get Vaga By ID",
