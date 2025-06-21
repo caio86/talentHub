@@ -142,6 +142,7 @@ type listCandidatoResponse struct {
 // @produce json
 // @param id path int true "Candidato ID"
 // @success 200 {object} http.candidatoDTO "Candidato achado"
+// @success 400 {object} http.ErrorResponse "Bad request"
 // @success 404 {object} http.ErrorResponse "Mensagem de error"
 func (s *Server) handleCandidatoGet(w http.ResponseWriter, r *http.Request) {
 	ids := r.PathValue("id")
@@ -174,6 +175,7 @@ func (s *Server) handleCandidatoGet(w http.ResponseWriter, r *http.Request) {
 // @param limit query int false "Pagination limit"
 // @param offset query int false "Pagination offset"
 // @success 200 {object} http.listCandidatoResponse "Lista de candidatos"
+// @success 400 {object} http.ErrorResponse "Bad request"
 // @success 404 {object} http.ErrorResponse "Mensagem de erro"
 func (s *Server) handleCandidatoList(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
@@ -229,6 +231,7 @@ func (s *Server) handleCandidatoList(w http.ResponseWriter, r *http.Request) {
 // @produce json
 // @param candidato body http.candidatoDTO true "Candidato a ser criado"
 // @success 201 {object} http.candidatoDTO "Candidato criado"
+// @success 400 {object} http.ErrorResponse "Bad request"
 // @success 404 {object} http.ErrorResponse "Mensagem de erro"
 func (s *Server) handleCandidatoCreate(w http.ResponseWriter, r *http.Request) {
 	var candidato candidatoDTO
@@ -261,6 +264,7 @@ func (s *Server) handleCandidatoCreate(w http.ResponseWriter, r *http.Request) {
 // @param id path int true "Candidato ID"
 // @param candidato body talenthub.CandidatoUpdate true "Dados de candidatos para atualizar"
 // @success 202 {object} http.candidatoDTO "Candidato atualizado"
+// @success 400 {object} http.ErrorResponse "Bad request"
 // @success 404 {object} http.ErrorResponse "Mensagem de erro"
 func (s *Server) handleCandidatoUpdate(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
