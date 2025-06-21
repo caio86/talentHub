@@ -198,6 +198,7 @@ func (s *Server) handleVagaList(w http.ResponseWriter, r *http.Request) {
 // @success 201 {object} http.vagaDTO "Vaga criada"
 // @success 400 {object} http.ErrorResponse "Bad request"
 // @success 404 {object} http.ErrorResponse "Mensagem de erro"
+// @success 500 {object} http.ErrorResponse "Internal Error"
 func (s *Server) handleVagaCreate(w http.ResponseWriter, r *http.Request) {
 	var vagadto createVagaDTO
 
@@ -237,6 +238,7 @@ func (s *Server) handleVagaCreate(w http.ResponseWriter, r *http.Request) {
 // @success 202 {object} http.vagaDTO "Vaga atualizada"
 // @success 400 {object} http.ErrorResponse "Bad request"
 // @success 404 {object} http.ErrorResponse "Mensagem de erro"
+// @success 500 {object} http.ErrorResponse "Internal Error"
 func (s *Server) handleVagaUpdate(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
