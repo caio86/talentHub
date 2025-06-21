@@ -14,6 +14,8 @@ func (s *Server) loadVagaRoutes(r *http.ServeMux) {
 	r.HandleFunc("GET /vaga", s.handleVagaList)
 	r.HandleFunc("POST /vaga", s.handleVagaCreate)
 	r.HandleFunc("PUT /vaga/{id}", s.handleVagaUpdate)
+	r.HandleFunc("POST /vaga/open/{id}", s.handleVagaOpen)
+	r.HandleFunc("POST /vaga/close/{id}", s.handleVagaClose)
 }
 
 // DTO
@@ -256,4 +258,52 @@ func (s *Server) handleVagaUpdate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
 	json.NewEncoder(w).Encode(res)
+}
+
+// @summary Open vaga
+// @description Open vaga
+// @router /vaga/open/{id} [post]
+// @tags Vagas
+// @param id path int true "Vaga ID"
+// @success 204 "Vaga aberta"
+// @success 400 {object} http.ErrorResponse "Bad request"
+// @success 404 {object} http.ErrorResponse "Mensagem de erro"
+func (s *Server) handleVagaOpen(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		Error(w, r, talenthub.Errorf(talenthub.EINVALID, "invalid id"))
+		return
+	}
+
+	err = s.VagaService.OpenVaga(r.Context(), id)
+	if err != nil {
+		Error(w, r, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// @summary Close vaga
+// @description Close vaga
+// @router /vaga/close/{id} [post]
+// @tags Vagas
+// @param id path int true "Vaga ID"
+// @success 204 "Vaga closed"
+// @success 400 {object} http.ErrorResponse "Bad request"
+// @success 404 {object} http.ErrorResponse "Mensagem de erro"
+func (s *Server) handleVagaClose(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		Error(w, r, talenthub.Errorf(talenthub.EINVALID, "invalid id"))
+		return
+	}
+
+	err = s.VagaService.CloseVaga(r.Context(), id)
+	if err != nil {
+		Error(w, r, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
