@@ -96,8 +96,6 @@ func (d *createVagaDTO) toDomain() *talenthub.Vaga {
 		Type:         d.Type,
 		Location:     d.Location,
 		Requirements: d.Requirements,
-
-		Posted_date: time.Now(),
 	}
 }
 
