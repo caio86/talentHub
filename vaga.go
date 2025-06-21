@@ -34,7 +34,7 @@ func (v *Vaga) Validate() error {
 type VagaService interface {
 	FindVagaByID(ctx context.Context, id int) (*Vaga, error)
 	FindVagas(ctx context.Context, filter VagaFilter) ([]*Vaga, int, error)
-	CreateVaga(ctx context.Context, vaga *Vaga) error
+	CreateVaga(ctx context.Context, vaga *Vaga) (*Vaga, error)
 	UpdateVaga(ctx context.Context, id int, upd VagaUpdate) (*Vaga, error)
 	OpenVaga(ctx context.Context, id int) error
 	CloseVaga(ctx context.Context, id int) error
@@ -48,7 +48,9 @@ type VagaFilter struct {
 }
 
 type VagaUpdate struct {
-	Name        string
-	Description string
-	Open        bool
+	Title       *string `json:"title"`
+	Description *string `json:"description"`
+	Area        *string `json:"area"`
+	Type        *string `json:"type"`
+	Location    *string `json:"location"`
 }
