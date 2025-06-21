@@ -40,6 +40,53 @@ definitions:
           type: string
         type: array
     type: object
+  http.createCandidatoDTO:
+    properties:
+      address:
+        type: string
+      education:
+        items:
+          properties:
+            course:
+              type: string
+            institution:
+              type: string
+            level:
+              type: string
+          type: object
+        type: array
+      email:
+        type: string
+      experience:
+        items:
+          properties:
+            company:
+              type: string
+            role:
+              type: string
+            years:
+              type: integer
+          type: object
+        type: array
+      interests:
+        items:
+          type: string
+        type: array
+      linkedin:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      resume_pdf_path:
+        type: string
+      skills:
+        items:
+          type: string
+        type: array
+    type: object
   http.createVagaDTO:
     properties:
       area:
@@ -191,7 +238,7 @@ paths:
         name: candidato
         required: true
         schema:
-          $ref: '#/definitions/http.candidatoDTO'
+          $ref: '#/definitions/http.createCandidatoDTO'
       produces:
       - application/json
       responses:
@@ -205,6 +252,10 @@ paths:
             $ref: '#/definitions/http.ErrorResponse'
         "404":
           description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
           schema:
             $ref: '#/definitions/http.ErrorResponse'
       summary: Create candidato
@@ -268,6 +319,10 @@ paths:
           description: Mensagem de erro
           schema:
             $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
       summary: Update candidato
       tags:
       - Candidatos
@@ -325,6 +380,10 @@ paths:
             $ref: '#/definitions/http.ErrorResponse'
         "404":
           description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
           schema:
             $ref: '#/definitions/http.ErrorResponse'
       summary: Create vaga
@@ -386,6 +445,10 @@ paths:
             $ref: '#/definitions/http.ErrorResponse'
         "404":
           description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
           schema:
             $ref: '#/definitions/http.ErrorResponse'
       summary: Update vaga

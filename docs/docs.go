@@ -79,7 +79,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/http.candidatoDTO"
+                            "$ref": "#/definitions/http.createCandidatoDTO"
                         }
                     }
                 ],
@@ -98,6 +98,12 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Mensagem de erro",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
                         "schema": {
                             "$ref": "#/definitions/http.ErrorResponse"
                         }
@@ -193,6 +199,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/http.ErrorResponse"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -280,6 +292,12 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Mensagem de erro",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
                         "schema": {
                             "$ref": "#/definitions/http.ErrorResponse"
                         }
@@ -445,6 +463,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/http.ErrorResponse"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
                     }
                 }
             }
@@ -482,6 +506,78 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "interests": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "linkedin": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "resume_pdf_path": {
+                    "type": "string"
+                },
+                "skills": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "http.createCandidatoDTO": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "education": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "course": {
+                                "type": "string"
+                            },
+                            "institution": {
+                                "type": "string"
+                            },
+                            "level": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "email": {
+                    "type": "string"
+                },
+                "experience": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "company": {
+                                "type": "string"
+                            },
+                            "role": {
+                                "type": "string"
+                            },
+                            "years": {
+                                "type": "integer"
+                            }
+                        }
+                    }
                 },
                 "interests": {
                     "type": "array",
