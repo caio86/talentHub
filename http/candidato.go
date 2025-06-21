@@ -241,7 +241,13 @@ func (s *Server) handleCandidatoCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newCandidato, err := s.CandidatoService.CreateCandidato(r.Context(), candidato.toDomain())
+	domain := candidato.toDomain()
+	if err := domain.Validate(); err != nil {
+		Error(w, r, err)
+		return
+	}
+
+	newCandidato, err := s.CandidatoService.CreateCandidato(r.Context(), domain)
 	if err != nil {
 		Error(w, r, err)
 		return

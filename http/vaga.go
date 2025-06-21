@@ -208,7 +208,13 @@ func (s *Server) handleVagaCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newVaga, err := s.VagaService.CreateVaga(r.Context(), vagadto.toDomain())
+	domain := vagadto.toDomain()
+	if err := domain.Validate(); err != nil {
+		Error(w, r, err)
+		return
+	}
+
+	newVaga, err := s.VagaService.CreateVaga(r.Context(), domain)
 	if err != nil {
 		Error(w, r, err)
 		return
