@@ -40,6 +40,23 @@ definitions:
           type: string
         type: array
     type: object
+  http.createVagaDTO:
+    properties:
+      area:
+        type: string
+      description:
+        type: string
+      location:
+        type: string
+      requirements:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+      type:
+        type: string
+    type: object
   http.education:
     properties:
       course:
@@ -82,14 +99,14 @@ definitions:
     type: object
   http.vagaDTO:
     properties:
-      IsActive:
-        type: boolean
       area:
         type: string
       description:
         type: string
       id:
         type: integer
+      is_active:
+        type: boolean
       location:
         type: string
       posted_date:
@@ -118,12 +135,16 @@ definitions:
     type: object
   talenthub.VagaUpdate:
     properties:
+      area:
+        type: string
       description:
         type: string
-      name:
+      location:
         type: string
-      open:
-        type: boolean
+      title:
+        type: string
+      type:
+        type: string
     type: object
 info:
   contact: {}
@@ -149,6 +170,10 @@ paths:
           description: Lista de candidatos
           schema:
             $ref: '#/definitions/http.listCandidatoResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
         "404":
           description: Mensagem de erro
           schema:
@@ -174,6 +199,10 @@ paths:
           description: Candidato criado
           schema:
             $ref: '#/definitions/http.candidatoDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
         "404":
           description: Mensagem de erro
           schema:
@@ -197,6 +226,10 @@ paths:
           description: Candidato achado
           schema:
             $ref: '#/definitions/http.candidatoDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
         "404":
           description: Mensagem de error
           schema:
@@ -227,6 +260,10 @@ paths:
           description: Candidato atualizado
           schema:
             $ref: '#/definitions/http.candidatoDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
         "404":
           description: Mensagem de erro
           schema:
@@ -253,6 +290,10 @@ paths:
           description: Lista de vagas
           schema:
             $ref: '#/definitions/http.listVagaResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
         "404":
           description: Mensagem de erro
           schema:
@@ -270,7 +311,7 @@ paths:
         name: candidato
         required: true
         schema:
-          $ref: '#/definitions/http.vagaDTO'
+          $ref: '#/definitions/http.createVagaDTO'
       produces:
       - application/json
       responses:
@@ -278,6 +319,10 @@ paths:
           description: Vaga criada
           schema:
             $ref: '#/definitions/http.vagaDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
         "404":
           description: Mensagem de erro
           schema:
@@ -301,6 +346,10 @@ paths:
           description: Vaga achada
           schema:
             $ref: '#/definitions/http.vagaDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
         "404":
           description: Mensagem de error
           schema:
@@ -311,7 +360,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: Update candidato
+      description: Update vaga
       parameters:
       - description: Vaga ID
         in: path
@@ -331,11 +380,15 @@ paths:
           description: Vaga atualizada
           schema:
             $ref: '#/definitions/http.vagaDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
         "404":
           description: Mensagem de erro
           schema:
             $ref: '#/definitions/http.ErrorResponse'
-      summary: Update candidato
+      summary: Update vaga
       tags:
       - Vagas
 swagger: "2.0"

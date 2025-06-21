@@ -46,6 +46,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/http.listCandidatoResponse"
                         }
                     },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Mensagem de erro",
                         "schema": {
@@ -84,6 +90,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/http.candidatoDTO"
                         }
                     },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Mensagem de erro",
                         "schema": {
@@ -117,6 +129,12 @@ const docTemplate = `{
                         "description": "Candidato achado",
                         "schema": {
                             "$ref": "#/definitions/http.candidatoDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "404": {
@@ -164,6 +182,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/http.candidatoDTO"
                         }
                     },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Mensagem de erro",
                         "schema": {
@@ -204,6 +228,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/http.listVagaResponse"
                         }
                     },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Mensagem de erro",
                         "schema": {
@@ -231,7 +261,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/http.vagaDTO"
+                            "$ref": "#/definitions/http.createVagaDTO"
                         }
                     }
                 ],
@@ -240,6 +270,12 @@ const docTemplate = `{
                         "description": "Vaga criada",
                         "schema": {
                             "$ref": "#/definitions/http.vagaDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "404": {
@@ -277,6 +313,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/http.vagaDTO"
                         }
                     },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Mensagem de error",
                         "schema": {
@@ -286,7 +328,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Update candidato",
+                "description": "Update vaga",
                 "consumes": [
                     "application/json"
                 ],
@@ -296,7 +338,7 @@ const docTemplate = `{
                 "tags": [
                     "Vagas"
                 ],
-                "summary": "Update candidato",
+                "summary": "Update vaga",
                 "parameters": [
                     {
                         "type": "integer",
@@ -320,6 +362,12 @@ const docTemplate = `{
                         "description": "Vaga atualizada",
                         "schema": {
                             "$ref": "#/definitions/http.vagaDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "404": {
@@ -394,6 +442,32 @@ const docTemplate = `{
                 }
             }
         },
+        "http.createVagaDTO": {
+            "type": "object",
+            "properties": {
+                "area": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "requirements": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "http.education": {
             "type": "object",
             "properties": {
@@ -459,9 +533,6 @@ const docTemplate = `{
         "http.vagaDTO": {
             "type": "object",
             "properties": {
-                "IsActive": {
-                    "type": "boolean"
-                },
                 "area": {
                     "type": "string"
                 },
@@ -470,6 +541,9 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
                 },
                 "location": {
                     "type": "string"
@@ -514,14 +588,20 @@ const docTemplate = `{
         "talenthub.VagaUpdate": {
             "type": "object",
             "properties": {
+                "area": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
-                "name": {
+                "location": {
                     "type": "string"
                 },
-                "open": {
-                    "type": "boolean"
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         }

@@ -38,6 +38,12 @@
                             "$ref": "#/definitions/http.listCandidatoResponse"
                         }
                     },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Mensagem de erro",
                         "schema": {
@@ -76,6 +82,12 @@
                             "$ref": "#/definitions/http.candidatoDTO"
                         }
                     },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Mensagem de erro",
                         "schema": {
@@ -109,6 +121,12 @@
                         "description": "Candidato achado",
                         "schema": {
                             "$ref": "#/definitions/http.candidatoDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "404": {
@@ -156,6 +174,12 @@
                             "$ref": "#/definitions/http.candidatoDTO"
                         }
                     },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Mensagem de erro",
                         "schema": {
@@ -196,6 +220,12 @@
                             "$ref": "#/definitions/http.listVagaResponse"
                         }
                     },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Mensagem de erro",
                         "schema": {
@@ -223,7 +253,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/http.vagaDTO"
+                            "$ref": "#/definitions/http.createVagaDTO"
                         }
                     }
                 ],
@@ -232,6 +262,12 @@
                         "description": "Vaga criada",
                         "schema": {
                             "$ref": "#/definitions/http.vagaDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "404": {
@@ -269,6 +305,12 @@
                             "$ref": "#/definitions/http.vagaDTO"
                         }
                     },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
                     "404": {
                         "description": "Mensagem de error",
                         "schema": {
@@ -278,7 +320,7 @@
                 }
             },
             "put": {
-                "description": "Update candidato",
+                "description": "Update vaga",
                 "consumes": [
                     "application/json"
                 ],
@@ -288,7 +330,7 @@
                 "tags": [
                     "Vagas"
                 ],
-                "summary": "Update candidato",
+                "summary": "Update vaga",
                 "parameters": [
                     {
                         "type": "integer",
@@ -312,6 +354,12 @@
                         "description": "Vaga atualizada",
                         "schema": {
                             "$ref": "#/definitions/http.vagaDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
                     "404": {
@@ -386,6 +434,32 @@
                 }
             }
         },
+        "http.createVagaDTO": {
+            "type": "object",
+            "properties": {
+                "area": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "location": {
+                    "type": "string"
+                },
+                "requirements": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
         "http.education": {
             "type": "object",
             "properties": {
@@ -451,9 +525,6 @@
         "http.vagaDTO": {
             "type": "object",
             "properties": {
-                "IsActive": {
-                    "type": "boolean"
-                },
                 "area": {
                     "type": "string"
                 },
@@ -462,6 +533,9 @@
                 },
                 "id": {
                     "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
                 },
                 "location": {
                     "type": "string"
@@ -506,14 +580,20 @@
         "talenthub.VagaUpdate": {
             "type": "object",
             "properties": {
+                "area": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
-                "name": {
+                "location": {
                     "type": "string"
                 },
-                "open": {
-                    "type": "boolean"
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
                 }
             }
         }
