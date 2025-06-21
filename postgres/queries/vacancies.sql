@@ -46,6 +46,16 @@ ORDER BY title;
 -- name: CountVacancies :one
 SELECT count(*) FROM vacancies;
 
+-- name: OpenVacancy :exec
+UPDATE vacancies
+  SET is_active = true
+  WHERE id = $1;
+
+-- name: CloseVacancy :exec
+UPDATE vacancies
+  SET is_active = false
+  WHERE id = $1;
+
 -- Area
 -- name: GetAreaByID :one
 SELECT * FROM employment_areas

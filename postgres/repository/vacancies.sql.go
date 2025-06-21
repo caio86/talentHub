@@ -44,6 +44,17 @@ func (q *Queries) AddVacancyRequirement(ctx context.Context, arg AddVacancyRequi
 	return err
 }
 
+const closeVacancy = `-- name: CloseVacancy :exec
+UPDATE vacancies
+  SET is_active = false
+  WHERE id = $1
+`
+
+func (q *Queries) CloseVacancy(ctx context.Context, id int32) error {
+	_, err := q.db.Exec(ctx, closeVacancy, id)
+	return err
+}
+
 const countVacancies = `-- name: CountVacancies :one
 SELECT count(*) FROM vacancies
 `
@@ -361,6 +372,17 @@ func (q *Queries) ListVacancies(ctx context.Context, arg ListVacanciesParams) ([
 		return nil, err
 	}
 	return items, nil
+}
+
+const openVacancy = `-- name: OpenVacancy :exec
+UPDATE vacancies
+  SET is_active = true
+  WHERE id = $1
+`
+
+func (q *Queries) OpenVacancy(ctx context.Context, id int32) error {
+	_, err := q.db.Exec(ctx, openVacancy, id)
+	return err
 }
 
 const removeVacancyRequirement = `-- name: RemoveVacancyRequirement :exec

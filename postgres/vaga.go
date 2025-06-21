@@ -312,9 +312,29 @@ func (s *VagaService) UpdateVaga(ctx context.Context, id int, upd talenthub.Vaga
 }
 
 func (s *VagaService) OpenVaga(ctx context.Context, id int) error {
-	return talenthub.Errorf(talenthub.ENOTIMPLEMENTED, "not implemented")
+	_, err := s.repo.GetVacancyByID(ctx, int32(id))
+	if err != nil {
+		return talenthub.Errorf(talenthub.ENOTFOUND, "vaga not found")
+	}
+
+	err = s.repo.OpenVacancy(ctx, int32(id))
+	if err != nil {
+		return talenthub.Errorf(talenthub.EINTERNAL, "internal error %s", err)
+	}
+
+	return nil
 }
 
 func (s *VagaService) CloseVaga(ctx context.Context, id int) error {
-	return talenthub.Errorf(talenthub.ENOTIMPLEMENTED, "not implemented")
+	_, err := s.repo.GetVacancyByID(ctx, int32(id))
+	if err != nil {
+		return talenthub.Errorf(talenthub.ENOTFOUND, "vaga not found")
+	}
+
+	err = s.repo.CloseVacancy(ctx, int32(id))
+	if err != nil {
+		return talenthub.Errorf(talenthub.EINTERNAL, "internal error %s", err)
+	}
+
+	return nil
 }
