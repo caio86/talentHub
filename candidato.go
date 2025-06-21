@@ -22,7 +22,7 @@ type Candidato struct {
 	ResumeLink string
 }
 
-func (c *Candidato) validate() error {
+func (c *Candidato) Validate() error {
 	if c.Name == "" {
 		return Errorf(EINVALID, "name required")
 	}

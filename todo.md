@@ -2,8 +2,9 @@
 - [x] fix pagination on services
 - [ ] sync endpoints with frontend
 - [ ] implementar score de candidatos
-- [ ] Create a Separate DTO for craete body request
+- [x] Create a Separate DTO for craete body request
 - [ ] Change postgres services to use Transaction
+- [ ] Normalize unique columns to lowercase
 
 # Duvidas
 

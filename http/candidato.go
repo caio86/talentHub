@@ -17,6 +17,11 @@ func (s *Server) loadCandidatoRoutes(r *http.ServeMux) {
 
 // DTO
 
+type listCandidatoResponse struct {
+	Candidatos []*candidatoDTO `json:"candidatos"`
+	Total      int             `json:"total"`
+}
+
 type experience struct {
 	ID      int    `json:"experience_id"`
 	Company string `json:"company"`
@@ -44,6 +49,30 @@ type candidatoDTO struct {
 	Education   []*education  `json:"education"`
 	Skills      []string      `json:"skills"`
 	Interests   []string      `json:"interests"`
+
+	ResumeLink string `json:"resume_pdf_path,omitempty"`
+}
+
+type createCandidatoDTO struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Phone    string `json:"phone,omitempty"`
+	Address  string `json:"address,omitempty"`
+	Linkedin string `json:"linkedin,omitempty"`
+
+	Experiences []*struct {
+		Company string `json:"company"`
+		Role    string `json:"role"`
+		Years   int    `json:"years"`
+	} `json:"experience"`
+	Education []*struct {
+		Institution string `json:"institution"`
+		Course      string `json:"course"`
+		Level       string `json:"level"`
+	} `json:"education"`
+	Skills    []string `json:"skills"`
+	Interests []string `json:"interests"`
 
 	ResumeLink string `json:"resume_pdf_path,omitempty"`
 }
@@ -128,9 +157,45 @@ func (d *candidatoDTO) fromDomain(domain *talenthub.Candidato) {
 	d.ResumeLink = domain.ResumeLink
 }
 
-type listCandidatoResponse struct {
-	Candidatos []*candidatoDTO `json:"candidatos"`
-	Total      int             `json:"total"`
+func (d *createCandidatoDTO) toDomain() *talenthub.Candidato {
+	canEdu := make([]*talenthub.Education, len(d.Education))
+	for k, v := range d.Education {
+		canEdu[k] = &talenthub.Education{
+			ID:          0,
+			CandidateID: 0,
+			Institution: v.Institution,
+			Course:      v.Course,
+			Level:       v.Level,
+		}
+	}
+
+	canExp := make([]*talenthub.Experience, len(d.Experiences))
+	for k, v := range d.Experiences {
+		canExp[k] = &talenthub.Experience{
+			ID:          0,
+			CandidateID: 0,
+			Company:     v.Company,
+			Role:        v.Role,
+			Years:       v.Years,
+		}
+	}
+
+	return &talenthub.Candidato{
+		ID:       0,
+		Name:     d.Name,
+		Email:    d.Email,
+		Password: d.Password,
+		Phone:    d.Phone,
+		Address:  d.Address,
+		Linkedin: d.Linkedin,
+
+		Experiences: canExp,
+		Education:   canEdu,
+		Skills:      d.Skills,
+		Interests:   d.Interests,
+
+		ResumeLink: d.ResumeLink,
+	}
 }
 
 // HTTP Handlers
@@ -229,12 +294,12 @@ func (s *Server) handleCandidatoList(w http.ResponseWriter, r *http.Request) {
 // @tags Candidatos
 // @accept json
 // @produce json
-// @param candidato body http.candidatoDTO true "Candidato a ser criado"
+// @param candidato body http.createCandidatoDTO true "Candidato a ser criado"
 // @success 201 {object} http.candidatoDTO "Candidato criado"
 // @success 400 {object} http.ErrorResponse "Bad request"
 // @success 404 {object} http.ErrorResponse "Mensagem de erro"
 func (s *Server) handleCandidatoCreate(w http.ResponseWriter, r *http.Request) {
-	var candidato candidatoDTO
+	var candidato createCandidatoDTO
 
 	if err := json.NewDecoder(r.Body).Decode(&candidato); err != nil {
 		Error(w, r, talenthub.Errorf(talenthub.EINVALID, "invalid json body"))
