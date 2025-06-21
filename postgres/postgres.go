@@ -5,6 +5,7 @@ import (
 	"embed"
 	"fmt"
 	"log"
+	"time"
 
 	talenthub "github.com/caio86/talentHub"
 	"github.com/golang-migrate/migrate/v4"
@@ -110,4 +111,24 @@ func (db *DB) runMigrations() error {
 	}
 
 	return nil
+}
+
+func (db *DB) BeginTx(ctx context.Context, opts *pgx.TxOptions) (*Tx, error) {
+	if opts == nil {
+		opts = &pgx.TxOptions{}
+	}
+	tx, err := db.conn.BeginTx(ctx, *opts)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Tx{
+		Tx:  tx,
+		now: time.Now(),
+	}, nil
+}
+
+type Tx struct {
+	pgx.Tx
+	now time.Time
 }

@@ -3,7 +3,7 @@
 - [ ] sync endpoints with frontend
 - [ ] implementar score de candidatos
 - [x] Create a Separate DTO for craete body request
-- [ ] Change postgres services to use Transaction
+- [x] Change postgres services to use Transaction
 - [ ] Normalize unique columns to lowercase
 
 # Duvidas

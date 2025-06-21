@@ -10,11 +10,12 @@ import (
 var _ talenthub.CandidatoService = (*CandidatoService)(nil)
 
 type CandidatoService struct {
+	db   *DB
 	repo *repository.Queries
 }
 
 func NewCandidatoService(db *DB) *CandidatoService {
-	return &CandidatoService{repository.New(db.conn)}
+	return &CandidatoService{db: db, repo: repository.New(db.conn)}
 }
 
 func (s *CandidatoService) FindCandidatoByID(ctx context.Context, id int) (*talenthub.Candidato, error) {
@@ -204,6 +205,14 @@ func (s *CandidatoService) FindCandidatos(ctx context.Context, filter talenthub.
 }
 
 func (s *CandidatoService) CreateCandidato(ctx context.Context, candidato *talenthub.Candidato) (*talenthub.Candidato, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	repoTx := s.repo.WithTx(tx)
+
 	arg := repository.CreateCandidateParams{
 		Name:      candidato.Name,
 		Email:     candidato.Email,
@@ -213,7 +222,7 @@ func (s *CandidatoService) CreateCandidato(ctx context.Context, candidato *talen
 		Linkedin:  &candidato.Name,
 		ResumeUrl: &candidato.Name,
 	}
-	newCandidate, err := s.repo.CreateCandidate(ctx, arg)
+	newCandidate, err := repoTx.CreateCandidate(ctx, arg)
 	if err != nil {
 		return nil, talenthub.Errorf(talenthub.EINTERNAL, "internal error: %v", err)
 	}
@@ -248,7 +257,7 @@ func (s *CandidatoService) CreateCandidato(ctx context.Context, candidato *talen
 			Level:       v.Level,
 		}
 
-		newEdu, err := s.repo.AddCandidateEducation(ctx, argEdu)
+		newEdu, err := repoTx.AddCandidateEducation(ctx, argEdu)
 		if err != nil {
 			return nil, talenthub.Errorf(talenthub.EINTERNAL, "erro interno: %s", err)
 		}
@@ -271,7 +280,7 @@ func (s *CandidatoService) CreateCandidato(ctx context.Context, candidato *talen
 			Years:       int32(v.Years),
 		}
 
-		newExp, err := s.repo.AddCandidateExperience(ctx, argExp)
+		newExp, err := repoTx.AddCandidateExperience(ctx, argExp)
 		if err != nil {
 			return nil, talenthub.Errorf(talenthub.EINTERNAL, "erro interno: %s", err)
 		}
@@ -292,7 +301,7 @@ func (s *CandidatoService) CreateCandidato(ctx context.Context, candidato *talen
 			Skill:       v,
 		}
 
-		err := s.repo.AddCandidateSkill(ctx, argSkill)
+		err := repoTx.AddCandidateSkill(ctx, argSkill)
 		if err != nil {
 			return nil, talenthub.Errorf(talenthub.EINTERNAL, "erro interno: %s", err)
 		}
@@ -307,12 +316,14 @@ func (s *CandidatoService) CreateCandidato(ctx context.Context, candidato *talen
 			Interest:    v,
 		}
 
-		err := s.repo.AddCandidateInterest(ctx, argInterest)
+		err := repoTx.AddCandidateInterest(ctx, argInterest)
 		if err != nil {
 			return nil, talenthub.Errorf(talenthub.EINTERNAL, "erro interno: %s", err)
 		}
 	}
 	res.Interests = candidato.Interests
+
+	tx.Commit(ctx)
 
 	return res, nil
 }
@@ -326,7 +337,15 @@ func (s *CandidatoService) UnregisterCandidato(ctx context.Context, candidatoID,
 }
 
 func (s *CandidatoService) UpdateCandidato(ctx context.Context, id int, upd talenthub.CandidatoUpdate) (*talenthub.Candidato, error) {
-	candidato, err := s.repo.GetCandidateByID(ctx, int32(id))
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	repoTx := s.repo.WithTx(tx)
+
+	candidato, err := repoTx.GetCandidateByID(ctx, int32(id))
 	if err != nil {
 		return nil, talenthub.Errorf(talenthub.ENOTFOUND, "candidato not found")
 	}
@@ -357,7 +376,7 @@ func (s *CandidatoService) UpdateCandidato(ctx context.Context, id int, upd tale
 		arg.ResumeUrl = upd.ResumeLink
 	}
 
-	updated, err := s.repo.UpdateCandidate(ctx, arg)
+	updated, err := repoTx.UpdateCandidate(ctx, arg)
 	if err != nil {
 		return nil, talenthub.Errorf(talenthub.EINTERNAL, "internal error: %v", err)
 	}
@@ -370,6 +389,8 @@ func (s *CandidatoService) UpdateCandidato(ctx context.Context, id int, upd tale
 		Linkedin:   *updated.Linkedin,
 		ResumeLink: *updated.ResumeUrl,
 	}
+
+	tx.Commit(ctx)
 
 	return res, nil
 }

@@ -11,11 +11,12 @@ import (
 var _ talenthub.VagaService = (*VagaService)(nil)
 
 type VagaService struct {
+	db   *DB
 	repo *repository.Queries
 }
 
 func NewVagaService(db *DB) *VagaService {
-	return &VagaService{repository.New(db.conn)}
+	return &VagaService{db: db, repo: repository.New(db.conn)}
 }
 
 func (s *VagaService) FindVagaByID(ctx context.Context, id int) (*talenthub.Vaga, error) {
@@ -168,16 +169,24 @@ func (s *VagaService) findVagas(ctx context.Context, arg repository.ListVacancie
 }
 
 func (s *VagaService) CreateVaga(ctx context.Context, vaga *talenthub.Vaga) (*talenthub.Vaga, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	repoTx := s.repo.WithTx(tx)
+
 	arg := repository.CreateVacancyParams{
 		Title:       vaga.Title,
 		Description: &vaga.Description,
 		IsActive:    vaga.IsActive,
 		Location:    &vaga.Location,
-		PostedDate:  pgtype.Date{Time: vaga.Posted_date, Valid: true},
+		PostedDate:  pgtype.Date{Time: tx.now, Valid: true},
 	}
 
 	if vaga.Type != "" {
-		typeID, err := s.repo.GetTypeByName(ctx, vaga.Type)
+		typeID, err := repoTx.GetTypeByName(ctx, vaga.Type)
 		if err != nil {
 			return nil, talenthub.Errorf(talenthub.EINTERNAL, "employment type does not exists")
 		}
@@ -187,7 +196,7 @@ func (s *VagaService) CreateVaga(ctx context.Context, vaga *talenthub.Vaga) (*ta
 	}
 
 	if vaga.Area != "" {
-		areaID, err := s.repo.GetAreaByName(ctx, vaga.Area)
+		areaID, err := repoTx.GetAreaByName(ctx, vaga.Area)
 		if err != nil {
 			return nil, talenthub.Errorf(talenthub.EINTERNAL, "employment area does not exists")
 		}
@@ -196,20 +205,20 @@ func (s *VagaService) CreateVaga(ctx context.Context, vaga *talenthub.Vaga) (*ta
 		arg.AreaID = nil
 	}
 
-	newVaga, err := s.repo.CreateVacancy(ctx, arg)
+	newVaga, err := repoTx.CreateVacancy(ctx, arg)
 	if err != nil {
 		return nil, talenthub.Errorf(talenthub.EINTERNAL, "internal error: %s", err)
 	}
 
 	for _, v := range vaga.Requirements {
-		req, err := s.repo.GetRequirementByName(ctx, v)
+		req, err := repoTx.GetRequirementByName(ctx, v)
 		if err != nil {
-			req, err = s.repo.AddRequirement(ctx, v)
+			req, err = repoTx.AddRequirement(ctx, v)
 			if err != nil {
 				return nil, talenthub.Errorf(talenthub.EINTERNAL, "internal error %s", err)
 			}
 		}
-		err = s.repo.AddVacancyRequirement(ctx, repository.AddVacancyRequirementParams{
+		err = repoTx.AddVacancyRequirement(ctx, repository.AddVacancyRequirementParams{
 			VacancyID:     newVaga.ID,
 			RequirementID: req.ID,
 		})
@@ -231,11 +240,21 @@ func (s *VagaService) CreateVaga(ctx context.Context, vaga *talenthub.Vaga) (*ta
 
 	res.Requirements = vaga.Requirements
 
+	tx.Commit(ctx)
+
 	return res, nil
 }
 
 func (s *VagaService) UpdateVaga(ctx context.Context, id int, upd talenthub.VagaUpdate) (*talenthub.Vaga, error) {
-	vaga, err := s.repo.GetVacancyByID(ctx, int32(id))
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	repoTx := s.repo.WithTx(tx)
+
+	vaga, err := repoTx.GetVacancyByID(ctx, int32(id))
 	if err != nil {
 		return nil, talenthub.Errorf(talenthub.ENOTFOUND, "vaga not found")
 	}
@@ -260,21 +279,21 @@ func (s *VagaService) UpdateVaga(ctx context.Context, id int, upd talenthub.Vaga
 		arg.Location = upd.Location
 	}
 	if upd.Area != nil {
-		areaID, err := s.repo.GetAreaByName(ctx, *upd.Area)
+		areaID, err := repoTx.GetAreaByName(ctx, *upd.Area)
 		if err != nil {
 			return nil, talenthub.Errorf(talenthub.EINTERNAL, "employment area does not exists")
 		}
 		arg.AreaID = &areaID.ID
 	}
 	if upd.Type != nil {
-		typeID, err := s.repo.GetTypeByName(ctx, *upd.Type)
+		typeID, err := repoTx.GetTypeByName(ctx, *upd.Type)
 		if err != nil {
 			return nil, talenthub.Errorf(talenthub.EINTERNAL, "employment type does not exists")
 		}
 		arg.TypeID = &typeID.ID
 	}
 
-	updated, err := s.repo.UpdateVacancy(ctx, arg)
+	updated, err := repoTx.UpdateVacancy(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -290,23 +309,25 @@ func (s *VagaService) UpdateVaga(ctx context.Context, id int, upd talenthub.Vaga
 		res.Description = *updated.Description
 	}
 	if updated.AreaID != nil {
-		areaID, _ := s.repo.GetAreaByID(ctx, *updated.AreaID)
+		areaID, _ := repoTx.GetAreaByID(ctx, *updated.AreaID)
 		res.Area = areaID.Name
 	}
 	if updated.TypeID != nil {
-		typeID, _ := s.repo.GetTypeByID(ctx, *updated.TypeID)
+		typeID, _ := repoTx.GetTypeByID(ctx, *updated.TypeID)
 		res.Type = typeID.Name
 	}
 	if updated.Location != nil {
 		res.Location = *updated.Location
 	}
 
-	requirements, _ := s.repo.GetRequirementsByVacancyID(ctx, int32(id))
+	requirements, _ := repoTx.GetRequirementsByVacancyID(ctx, int32(id))
 	if requirements == nil {
 		res.Requirements = make([]string, 0)
 	} else {
 		res.Requirements = requirements
 	}
+
+	tx.Commit(ctx)
 
 	return res, nil
 }
