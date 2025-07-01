@@ -42,6 +42,7 @@ func NewServer() *Server {
 	// Setting middlewares
 	middlewares := createMiddlewares(
 		s.logging,
+		s.recoverPanic,
 		s.cors,
 	)
 
