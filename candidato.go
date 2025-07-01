@@ -40,8 +40,6 @@ type CandidatoService interface {
 	FindCandidatoByID(ctx context.Context, id int) (*Candidato, error)
 	FindCandidatos(ctx context.Context, filter CandidatoFilter) ([]*Candidato, int, error)
 	CreateCandidato(ctx context.Context, candidato *Candidato) (*Candidato, error)
-	RegisterCandidato(ctx context.Context, candidatoID, vagaID int) error
-	UnregisterCandidato(ctx context.Context, candidatoID, vagaID int) error
 	UpdateCandidato(ctx context.Context, id int, upd CandidatoUpdate) (*Candidato, error)
 }
 

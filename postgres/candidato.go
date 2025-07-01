@@ -328,14 +328,6 @@ func (s *CandidatoService) CreateCandidato(ctx context.Context, candidato *talen
 	return res, nil
 }
 
-func (s *CandidatoService) RegisterCandidato(ctx context.Context, candidatoID, vagaID int) error {
-	return talenthub.Errorf(talenthub.ENOTIMPLEMENTED, "not implemented")
-}
-
-func (s *CandidatoService) UnregisterCandidato(ctx context.Context, candidatoID, vagaID int) error {
-	return talenthub.Errorf(talenthub.ENOTIMPLEMENTED, "not implemented")
-}
-
 func (s *CandidatoService) UpdateCandidato(ctx context.Context, id int, upd talenthub.CandidatoUpdate) (*talenthub.Candidato, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
