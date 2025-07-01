@@ -5,6 +5,21 @@ definitions:
       error:
         type: string
     type: object
+  http.applicationDTO:
+    properties:
+      application_date:
+        type: string
+      candidate_id:
+        type: integer
+      id:
+        type: integer
+      score:
+        type: integer
+      status:
+        type: string
+      vacancy_id:
+        type: integer
+    type: object
   http.candidatoDTO:
     properties:
       address:
@@ -126,6 +141,15 @@ definitions:
       years:
         type: integer
     type: object
+  http.listApplicationResponse:
+    properties:
+      applications:
+        items:
+          $ref: '#/definitions/http.applicationDTO'
+        type: array
+      total:
+        type: integer
+    type: object
   http.listCandidatoResponse:
     properties:
       candidatos:
@@ -143,6 +167,17 @@ definitions:
         items:
           $ref: '#/definitions/http.vagaDTO'
         type: array
+    type: object
+  http.registerApplicationDTO:
+    properties:
+      candidate_id:
+        type: integer
+      score:
+        type: integer
+      status:
+        type: string
+      vacancy_id:
+        type: integer
     type: object
   http.vagaDTO:
     properties:
@@ -165,6 +200,13 @@ definitions:
       title:
         type: string
       type:
+        type: string
+    type: object
+  talenthub.ApplicationUpdate:
+    properties:
+      score:
+        type: integer
+      status:
         type: string
     type: object
   talenthub.CandidatoUpdate:
@@ -198,6 +240,218 @@ info:
   title: talentHub API
   version: "1.0"
 paths:
+  /application:
+    get:
+      description: Lista Applications
+      parameters:
+      - description: Pagination limit
+        in: query
+        name: limit
+        type: integer
+      - description: Pagination offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lista de applications
+          schema:
+            $ref: '#/definitions/http.listApplicationResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Lista Applications
+      tags:
+      - Applications
+    post:
+      consumes:
+      - application/json
+      description: Register application
+      parameters:
+      - description: Application a ser registrada
+        in: body
+        name: candidato
+        required: true
+        schema:
+          $ref: '#/definitions/http.registerApplicationDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Application criada
+          schema:
+            $ref: '#/definitions/http.applicationDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Register application
+      tags:
+      - Applications
+  /application/{id}:
+    delete:
+      description: Unregister vaga
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: application unregistered
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Unregister application
+      tags:
+      - Applications
+    get:
+      description: Get Application By ID
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Application achada
+          schema:
+            $ref: '#/definitions/http.applicationDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Mensagem de error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Get Application By ID
+      tags:
+      - Applications
+    put:
+      consumes:
+      - application/json
+      description: Update application
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Dados de applications para atualizar
+        in: body
+        name: candidato
+        required: true
+        schema:
+          $ref: '#/definitions/talenthub.ApplicationUpdate'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Application atualizada
+          schema:
+            $ref: '#/definitions/http.applicationDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Update application
+      tags:
+      - Applications
+  /application/candidato/{id}:
+    get:
+      description: Pesquisa applications por id da vaga
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lista de applications
+          schema:
+            $ref: '#/definitions/http.listApplicationResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Pesquisa applications por id da vaga
+      tags:
+      - Applications
+  /application/vaga/{id}:
+    get:
+      description: Pesquisa applications por id da vaga
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lista de applications
+          schema:
+            $ref: '#/definitions/http.listApplicationResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Pesquisa applications por id da vaga
+      tags:
+      - Applications
   /candidato:
     get:
       description: Lista Candidatos
