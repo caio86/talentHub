@@ -27,39 +27,61 @@ type listApplicationResponse struct {
 }
 
 type applicationDTO struct {
-	ID              int       `json:"id"`
-	CandidateID     int       `json:"candidate_id"`
-	VacancyID       int       `json:"vacancy_id"`
-	Score           int       `json:"score"`
-	Status          string    `json:"status"`
-	ApplicationDate time.Time `json:"application_date"`
+	ID              string `json:"id"`
+	CandidateID     string `json:"candidateId"`
+	VacancyID       string `json:"vacancyId"`
+	Score           *int   `json:"score"`
+	Status          string `json:"status"`
+	ApplicationDate string `json:"applicationDate"`
 }
 
 type registerApplicationDTO struct {
-	CandidateID int    `json:"candidate_id"`
-	VacancyID   int    `json:"vacancy_id"`
-	Score       int    `json:"score"`
-	Status      string `json:"status"`
+	CandidateID     string `json:"candidateId"`
+	VacancyID       string `json:"vacancyId"`
+	Score           *int   `json:"score"`
+	Status          string `json:"status"`
+	ApplicationDate string `json:"applicationDate"`
 }
 
 // DTO Helpers
 
 func (d *applicationDTO) fromDomain(domain *talenthub.Application) {
-	d.ID = domain.ID
-	d.CandidateID = domain.CandidateID
-	d.VacancyID = domain.VacancyID
-	d.Score = domain.Score
+	d.ID = strconv.Itoa(domain.ID)
+	d.CandidateID = strconv.Itoa(domain.CandidateID)
+	d.VacancyID = strconv.Itoa(domain.VacancyID)
+	d.Score = &domain.Score
 	d.Status = domain.Status
-	d.ApplicationDate = domain.ApplicationDate
+	d.ApplicationDate = domain.ApplicationDate.Format("2006-01-02T15:04:05.000Z")
 }
 
 func (d *registerApplicationDTO) toDomain() *talenthub.Application {
+	candidateID, _ := strconv.Atoi(d.CandidateID)
+	vacancyID, _ := strconv.Atoi(d.VacancyID)
+	
+	score := 0
+	if d.Score != nil {
+		score = *d.Score
+	}
+	
+	// Parse application date or use current time
+	var applicationDate time.Time
+	if d.ApplicationDate != "" {
+		if parsed, err := time.Parse("2006-01-02T15:04:05.000Z", d.ApplicationDate); err == nil {
+			applicationDate = parsed
+		} else {
+			applicationDate = time.Now()
+		}
+	} else {
+		applicationDate = time.Now()
+	}
+	
 	return &talenthub.Application{
-		ID:          0,
-		CandidateID: d.CandidateID,
-		VacancyID:   d.VacancyID,
-		Score:       d.Score,
-		Status:      d.Status,
+		ID:              0,
+		CandidateID:     candidateID,
+		VacancyID:       vacancyID,
+		Score:           score,
+		Status:          d.Status,
+		ApplicationDate: applicationDate,
 	}
 }
 
@@ -135,7 +157,7 @@ func (s *Server) handleApplicationList(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	applications, total, err := s.ApplicationService.FindApplications(r.Context(), filter)
+	applications, _, err := s.ApplicationService.FindApplications(r.Context(), filter)
 	if err != nil {
 		Error(w, r, err)
 		return
@@ -149,10 +171,7 @@ func (s *Server) handleApplicationList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(listApplicationResponse{
-		Applications: res,
-		Total:        total,
-	})
+	json.NewEncoder(w).Encode(res)
 }
 
 // @summary Register application
@@ -274,7 +293,7 @@ func (s *Server) handleApplicationSearchByCandidateID(w http.ResponseWriter, r *
 		return
 	}
 
-	applications, total, err := s.ApplicationService.SearchApplicationsByCandidateID(r.Context(), id)
+	applications, _, err := s.ApplicationService.SearchApplicationsByCandidateID(r.Context(), id)
 	if err != nil {
 		Error(w, r, err)
 		return
@@ -288,10 +307,7 @@ func (s *Server) handleApplicationSearchByCandidateID(w http.ResponseWriter, r *
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(listApplicationResponse{
-		Applications: res,
-		Total:        total,
-	})
+	json.NewEncoder(w).Encode(res)
 }
 
 // @summary Pesquisa applications por id da vaga
@@ -311,7 +327,7 @@ func (s *Server) handleApplicationSearchByVacancyID(w http.ResponseWriter, r *ht
 		return
 	}
 
-	applications, total, err := s.ApplicationService.SearchApplicationsByVacancyID(r.Context(), id)
+	applications, _, err := s.ApplicationService.SearchApplicationsByVacancyID(r.Context(), id)
 	if err != nil {
 		Error(w, r, err)
 		return
@@ -325,8 +341,5 @@ func (s *Server) handleApplicationSearchByVacancyID(w http.ResponseWriter, r *ht
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(listApplicationResponse{
-		Applications: res,
-		Total:        total,
-	})
+	json.NewEncoder(w).Encode(res)
 }

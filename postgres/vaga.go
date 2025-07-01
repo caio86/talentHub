@@ -30,6 +30,8 @@ func (s *VagaService) FindVagaByID(ctx context.Context, id int) (*talenthub.Vaga
 		Title:       result.Title,
 		IsActive:    result.IsActive,
 		Posted_date: result.PostedDate.Time,
+		Benefits:    make([]string, 0), // Inicializar como array vazio
+		Company:     "",                // Valor padrão
 	}
 
 	if result.Description != nil {
@@ -98,6 +100,8 @@ func (s *VagaService) findAllVagas(ctx context.Context) ([]*talenthub.Vaga, int,
 			Title:       v.Title,
 			IsActive:    v.IsActive,
 			Posted_date: v.PostedDate.Time,
+			Benefits:    make([]string, 0), // Inicializar como array vazio
+			Company:     "",                // Valor padrão
 		}
 
 		if v.Description != nil {
@@ -142,6 +146,8 @@ func (s *VagaService) findVagas(ctx context.Context, arg repository.ListVacancie
 			Title:       v.Title,
 			IsActive:    v.IsActive,
 			Posted_date: v.PostedDate.Time,
+			Benefits:    make([]string, 0), // Inicializar como array vazio
+			Company:     "",                // Valor padrão
 		}
 
 		if v.Description != nil {
@@ -236,6 +242,9 @@ func (s *VagaService) CreateVaga(ctx context.Context, vaga *talenthub.Vaga) (*ta
 		Type:        vaga.Type,
 		Location:    vaga.Location,
 		Posted_date: newVaga.PostedDate.Time,
+		Benefits:    vaga.Benefits,
+		Salary:      vaga.Salary,
+		Company:     vaga.Company,
 	}
 
 	res.Requirements = vaga.Requirements
@@ -303,6 +312,8 @@ func (s *VagaService) UpdateVaga(ctx context.Context, id int, upd talenthub.Vaga
 		Title:       updated.Title,
 		IsActive:    updated.IsActive,
 		Posted_date: updated.PostedDate.Time,
+		Benefits:    make([]string, 0), // Inicializar como array vazio
+		Company:     "",                // Valor padrão
 	}
 
 	if updated.Description != nil {
@@ -359,3 +370,18 @@ func (s *VagaService) CloseVaga(ctx context.Context, id int) error {
 
 	return nil
 }
+
+func (s *VagaService) DeleteVaga(ctx context.Context, id int) error {
+	_, err := s.repo.GetVacancyByID(ctx, int32(id))
+	if err != nil {
+		return talenthub.Errorf(talenthub.ENOTFOUND, "vaga not found")
+	}
+
+	err = s.repo.DeleteVacancy(ctx, int32(id))
+	if err != nil {
+		return talenthub.Errorf(talenthub.EINTERNAL, "internal error %s", err)
+	}
+
+	return nil
+}
+
