@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS applications (
   candidate_id int NOT NULL REFERENCES candidates(id),
   vacancy_id int NOT NULL REFERENCES vacancies(id),
   application_date TIMESTAMP NOT NULL DEFAULT NOW(),
-  score int CHECK (score BETWEEN 0 and 100),
+  score int NOT NULL DEFAULT 0 CHECK (score BETWEEN 0 and 100),
   status_id int REFERENCES application_status(id),
   UNIQUE (candidate_id, vacancy_id)
 );

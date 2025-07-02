@@ -15,7 +15,7 @@ type Application struct {
 	CandidateID     int32     `json:"candidate_id"`
 	VacancyID       int32     `json:"vacancy_id"`
 	ApplicationDate time.Time `json:"application_date"`
-	Score           *int32    `json:"score"`
+	Score           int32     `json:"score"`
 	StatusID        *int32    `json:"status_id"`
 }
 
