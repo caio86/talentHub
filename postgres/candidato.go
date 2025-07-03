@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"net/mail"
 
 	talenthub "github.com/caio86/talentHub"
 	"github.com/caio86/talentHub/postgres/repository"
@@ -169,6 +170,10 @@ func (s *CandidatoService) CreateCandidato(ctx context.Context, candidato *talen
 	defer tx.Rollback(ctx)
 
 	repoTx := s.repo.WithTx(tx)
+
+	if _, err := mail.ParseAddress(candidato.Email); err != nil {
+		return nil, talenthub.Errorf(talenthub.EINVALID, "email invalid")
+	}
 
 	arg := repository.CreateCandidateParams{
 		Name:      candidato.Name,
