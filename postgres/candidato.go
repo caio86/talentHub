@@ -32,7 +32,7 @@ func (s *CandidatoService) FindCandidatoByID(ctx context.Context, id int) (*tale
 		return nil, talenthub.Errorf(talenthub.ENOTFOUND, "candidato not found")
 	}
 
-	candidate := talenthub.Candidato{
+	candidate := &talenthub.Candidato{
 		ID:       int(result.ID),
 		Name:     result.Name,
 		Email:    result.Email,
@@ -53,59 +53,9 @@ func (s *CandidatoService) FindCandidatoByID(ctx context.Context, id int) (*tale
 		candidate.ResumeLink = *result.ResumeUrl
 	}
 
-	// educations := make([]*talenthub.Education)
-	if resEducation, err := repoTx.GetCandidateEducations(ctx, int32(id)); err != nil {
-		candidate.Education = make([]*talenthub.Education, 0)
-	} else {
-		candidate.Education = make([]*talenthub.Education, len(resEducation))
-		for k, v := range resEducation {
-			candidate.Education[k] = &talenthub.Education{
-				CandidateID: int(v.CandidateID),
-				ID:          int(v.ID),
-				Institution: v.Institution,
-				Course:      v.Course,
-				Level:       v.Level,
-			}
-		}
-	}
+	s.attachCandidateAssociations(ctx, tx, candidate)
 
-	// experiences := make([]*talenthub.Experience)
-	if resExperiences, err := repoTx.GetCandidateExperiences(ctx, int32(id)); err != nil {
-		candidate.Experiences = make([]*talenthub.Experience, 0)
-	} else {
-		candidate.Experiences = make([]*talenthub.Experience, len(resExperiences))
-		for k, v := range resExperiences {
-			candidate.Experiences[k] = &talenthub.Experience{
-				CandidateID: int(v.CandidateID),
-				ID:          int(v.ID),
-				Company:     v.Company,
-				Role:        v.Role,
-				Years:       int(v.Years),
-			}
-		}
-	}
-
-	// Candiate Skills
-	if resSkills, err := repoTx.GetCandidateSkills(ctx, int32(id)); err != nil {
-		candidate.Skills = make([]string, 0)
-	} else {
-		candidate.Skills = make([]string, len(resSkills))
-		for k, v := range resSkills {
-			candidate.Skills[k] = v.Skill
-		}
-	}
-
-	// Candidate Interests
-	if resInterests, err := repoTx.GetCandidateInterests(ctx, int32(id)); err != nil {
-		candidate.Interests = make([]string, 0)
-	} else {
-		candidate.Interests = make([]string, len(resInterests))
-		for k, v := range resInterests {
-			candidate.Interests[k] = v.Interest
-		}
-	}
-
-	return &candidate, nil
+	return candidate, nil
 }
 
 func (s *CandidatoService) FindCandidatos(ctx context.Context, filter talenthub.CandidatoFilter) ([]*talenthub.Candidato, int, error) {
@@ -115,29 +65,29 @@ func (s *CandidatoService) FindCandidatos(ctx context.Context, filter talenthub.
 	}
 	defer tx.Rollback(ctx)
 
-	repoTx := s.repo.WithTx(tx)
-
 	arg := repository.ListCandidatesParams{
 		Limit:  filter.Limit,
 		Offset: filter.Offset * filter.Limit,
 	}
+
+	if arg.Limit <= 0 {
+		return s.findAllCandidatos(ctx, tx)
+	} else {
+		return s.findCandidatos(ctx, tx, arg)
+	}
+}
+
+func (s *CandidatoService) findAllCandidatos(ctx context.Context, tx *Tx) ([]*talenthub.Candidato, int, error) {
+	repoTx := s.repo.WithTx(tx)
 
 	total, err := repoTx.CountCandidates(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	var candidatos []repository.Candidate
-	if arg.Limit == 0 {
-		candidatos, err = repoTx.ListAllCandidates(ctx)
-		if err != nil {
-			return nil, 0, err
-		}
-	} else {
-		candidatos, err = repoTx.ListCandidates(ctx, arg)
-		if err != nil {
-			return nil, 0, err
-		}
+	candidatos, err := repoTx.ListAllCandidates(ctx)
+	if err != nil {
+		return nil, 0, err
 	}
 
 	res := make([]*talenthub.Candidato, len(candidatos))
@@ -163,57 +113,49 @@ func (s *CandidatoService) FindCandidatos(ctx context.Context, filter talenthub.
 			res[i].ResumeLink = *v.ResumeUrl
 		}
 
-		// educations := make([]*talenthub.Education)
-		if resEducation, err := repoTx.GetCandidateEducations(ctx, int32(v.ID)); err != nil {
-			res[i].Education = make([]*talenthub.Education, 0)
-		} else {
-			res[i].Education = make([]*talenthub.Education, len(resEducation))
-			for k, v := range resEducation {
-				res[i].Education[k] = &talenthub.Education{
-					CandidateID: int(v.CandidateID),
-					ID:          int(v.ID),
-					Institution: v.Institution,
-					Course:      v.Course,
-					Level:       v.Level,
-				}
-			}
+		s.attachCandidateAssociations(ctx, tx, res[i])
+	}
+
+	return res, int(total), nil
+}
+
+func (s *CandidatoService) findCandidatos(ctx context.Context, tx *Tx, arg repository.ListCandidatesParams) ([]*talenthub.Candidato, int, error) {
+	repoTx := s.repo.WithTx(tx)
+
+	total, err := repoTx.CountCandidates(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	candidatos, err := repoTx.ListCandidates(ctx, arg)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	res := make([]*talenthub.Candidato, len(candidatos))
+	for i, v := range candidatos {
+		res[i] = &talenthub.Candidato{
+			ID:       int(v.ID),
+			Name:     v.Name,
+			Email:    v.Email,
+			Password: v.Password,
 		}
 
-		// experiences := make([]*talenthub.Experience)
-		if resExperiences, err := repoTx.GetCandidateExperiences(ctx, int32(v.ID)); err != nil {
-			res[i].Experiences = make([]*talenthub.Experience, 0)
-		} else {
-			res[i].Experiences = make([]*talenthub.Experience, len(resExperiences))
-			for k, v := range resExperiences {
-				res[i].Experiences[k] = &talenthub.Experience{
-					CandidateID: int(v.CandidateID),
-					ID:          int(v.ID),
-					Company:     v.Company,
-					Role:        v.Role,
-					Years:       int(v.Years),
-				}
-			}
+		// Checking for nils
+		if v.Phone != nil {
+			res[i].Phone = *v.Phone
+		}
+		if v.Address != nil {
+			res[i].Address = *v.Address
+		}
+		if v.Linkedin != nil {
+			res[i].Linkedin = *v.Linkedin
+		}
+		if v.ResumeUrl != nil {
+			res[i].ResumeLink = *v.ResumeUrl
 		}
 
-		// Candiate Skills
-		if resSkills, err := repoTx.GetCandidateSkills(ctx, int32(v.ID)); err != nil {
-			res[i].Skills = make([]string, 0)
-		} else {
-			res[i].Skills = make([]string, len(resSkills))
-			for k, v := range resSkills {
-				res[i].Skills[k] = v.Skill
-			}
-		}
-
-		// Candidate Interests
-		if resInterests, err := repoTx.GetCandidateInterests(ctx, int32(v.ID)); err != nil {
-			res[i].Interests = make([]string, 0)
-		} else {
-			res[i].Interests = make([]string, len(resInterests))
-			for k, v := range resInterests {
-				res[i].Interests[k] = v.Interest
-			}
-		}
+		s.attachCandidateAssociations(ctx, tx, res[i])
 	}
 
 	return res, int(total), nil
@@ -405,4 +347,60 @@ func (s *CandidatoService) UpdateCandidato(ctx context.Context, id int, upd tale
 	tx.Commit(ctx)
 
 	return res, nil
+}
+
+func (s *CandidatoService) attachCandidateAssociations(ctx context.Context, tx *Tx, candidate *talenthub.Candidato) {
+	repoTx := s.repo.WithTx(tx)
+
+	// educations := make([]*talenthub.Education)
+	if resEducation, err := repoTx.GetCandidateEducations(ctx, int32(candidate.ID)); err != nil {
+		candidate.Education = make([]*talenthub.Education, 0)
+	} else {
+		candidate.Education = make([]*talenthub.Education, len(resEducation))
+		for k, v := range resEducation {
+			candidate.Education[k] = &talenthub.Education{
+				CandidateID: int(v.CandidateID),
+				ID:          int(v.ID),
+				Institution: v.Institution,
+				Course:      v.Course,
+				Level:       v.Level,
+			}
+		}
+	}
+
+	// experiences := make([]*talenthub.Experience)
+	if resExperiences, err := repoTx.GetCandidateExperiences(ctx, int32(candidate.ID)); err != nil {
+		candidate.Experiences = make([]*talenthub.Experience, 0)
+	} else {
+		candidate.Experiences = make([]*talenthub.Experience, len(resExperiences))
+		for k, v := range resExperiences {
+			candidate.Experiences[k] = &talenthub.Experience{
+				CandidateID: int(v.CandidateID),
+				ID:          int(v.ID),
+				Company:     v.Company,
+				Role:        v.Role,
+				Years:       int(v.Years),
+			}
+		}
+	}
+
+	// Candiate Skills
+	if resSkills, err := repoTx.GetCandidateSkills(ctx, int32(candidate.ID)); err != nil {
+		candidate.Skills = make([]string, 0)
+	} else {
+		candidate.Skills = make([]string, len(resSkills))
+		for k, v := range resSkills {
+			candidate.Skills[k] = v.Skill
+		}
+	}
+
+	// Candidate Interests
+	if resInterests, err := repoTx.GetCandidateInterests(ctx, int32(candidate.ID)); err != nil {
+		candidate.Interests = make([]string, 0)
+	} else {
+		candidate.Interests = make([]string, len(resInterests))
+		for k, v := range resInterests {
+			candidate.Interests[k] = v.Interest
+		}
+	}
 }
