@@ -224,7 +224,12 @@ func (s *CandidatoService) CreateCandidato(ctx context.Context, candidato *talen
 	}
 	newCandidate, err := repoTx.CreateCandidate(ctx, arg)
 	if err != nil {
-		return nil, talenthub.Errorf(talenthub.EINTERNAL, "internal error: %v", err)
+		switch err.Error() {
+		case "ERROR: duplicate key value violates unique constraint \"candidates_email_key\" (SQLSTATE 23505)":
+			return nil, talenthub.Errorf(talenthub.ECONFLICT, "email already exists")
+		default:
+			return nil, err
+		}
 	}
 
 	res := &talenthub.Candidato{

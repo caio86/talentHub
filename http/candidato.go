@@ -298,6 +298,7 @@ func (s *Server) handleCandidatoList(w http.ResponseWriter, r *http.Request) {
 // @success 201 {object} http.candidatoDTO "Candidato criado"
 // @success 400 {object} http.ErrorResponse "Bad request"
 // @success 404 {object} http.ErrorResponse "Mensagem de erro"
+// @success 409 {object} http.ErrorResponse "email already exists"
 // @success 500 {object} http.ErrorResponse "Internal Error"
 func (s *Server) handleCandidatoCreate(w http.ResponseWriter, r *http.Request) {
 	var candidato createCandidatoDTO

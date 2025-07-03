@@ -10,6 +10,7 @@ const (
 	EINTERNAL       = "internal"
 	ENOTFOUND       = "not_found"
 	ENOTIMPLEMENTED = "not_implemented"
+	ECONFLICT       = "conflict"
 )
 
 type Error struct {
