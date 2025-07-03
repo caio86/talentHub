@@ -35,12 +35,20 @@ CREATE TABLE IF NOT EXISTS vacancy_requirements (
 -- Areas
 INSERT INTO employment_areas (name) VALUES
 ('Tecnologia'),
+('Vendas'),
+('Financeiro'),
+('Design'),
+('Produto'),
+('Operações'),
 ('Marketing'),
 ('Recursos Humanos');
 
 -- Employment Types
 INSERT INTO employment_types (name) VALUES
 ('Tempo Integral'),
+('Meio Período'),
+('Freelancer'),
+('Contrato'),
 ('Estágio');
 
 -- Vancancies
