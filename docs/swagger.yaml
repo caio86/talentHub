@@ -499,6 +499,10 @@ paths:
         in: query
         name: offset
         type: integer
+      - description: Email to search
+        in: query
+        name: email
+        type: string
       produces:
       - application/json
       responses:

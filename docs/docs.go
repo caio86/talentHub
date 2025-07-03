@@ -358,6 +358,12 @@ const docTemplate = `{
                         "description": "Pagination offset",
                         "name": "offset",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Email to search",
+                        "name": "email",
+                        "in": "query"
                     }
                 ],
                 "responses": {
