@@ -7,18 +7,18 @@ definitions:
     type: object
   http.applicationDTO:
     properties:
-      application_date:
+      applicationDate:
         type: string
-      candidate_id:
-        type: integer
+      candidateId:
+        type: string
       id:
-        type: integer
+        type: string
       score:
         type: integer
       status:
         type: string
-      vacancy_id:
-        type: integer
+      vacancyId:
+        type: string
     type: object
   http.candidatoDTO:
     properties:
@@ -30,16 +30,18 @@ definitions:
         type: array
       email:
         type: string
-      experience:
+      experiences:
         items:
           $ref: '#/definitions/http.experience'
         type: array
       id:
-        type: integer
+        type: string
       interests:
         items:
           type: string
         type: array
+      is_reserve:
+        type: boolean
       linkedin:
         type: string
       name:
@@ -106,6 +108,12 @@ definitions:
     properties:
       area:
         type: string
+      benefits:
+        items:
+          type: string
+        type: array
+      company:
+        type: string
       description:
         type: string
       location:
@@ -114,6 +122,8 @@ definitions:
         items:
           type: string
         type: array
+      salary:
+        type: string
       title:
         type: string
       type:
@@ -123,8 +133,6 @@ definitions:
     properties:
       course:
         type: string
-      education_id:
-        type: integer
       institution:
         type: string
       level:
@@ -134,8 +142,6 @@ definitions:
     properties:
       company:
         type: string
-      experience_id:
-        type: integer
       role:
         type: string
       years:
@@ -170,33 +176,54 @@ definitions:
     type: object
   http.registerApplicationDTO:
     properties:
-      candidate_id:
-        type: integer
+      applicationDate:
+        type: string
+      candidateId:
+        type: string
       score:
         type: integer
       status:
         type: string
-      vacancy_id:
-        type: integer
+      vacancyId:
+        type: string
+    type: object
+  http.rhUserDTO:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
     type: object
   http.vagaDTO:
     properties:
       area:
         type: string
+      benefits:
+        items:
+          type: string
+        type: array
+      company:
+        type: string
       description:
         type: string
       id:
         type: integer
-      is_active:
+      isActive:
         type: boolean
       location:
         type: string
-      posted_date:
+      postedDate:
         type: string
       requirements:
         items:
           type: string
         type: array
+      salary:
+        type: string
       title:
         type: string
       type:
@@ -226,9 +253,17 @@ definitions:
     properties:
       area:
         type: string
+      benefits:
+        items:
+          type: string
+        type: array
+      company:
+        type: string
       description:
         type: string
       location:
+        type: string
+      salary:
         type: string
       title:
         type: string
@@ -508,6 +543,10 @@ paths:
           description: Mensagem de erro
           schema:
             $ref: '#/definitions/http.ErrorResponse'
+        "409":
+          description: email already exists
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
         "500":
           description: Internal Error
           schema:
@@ -540,6 +579,44 @@ paths:
           schema:
             $ref: '#/definitions/http.ErrorResponse'
       summary: Get Candidato By ID
+      tags:
+      - Candidatos
+    patch:
+      consumes:
+      - application/json
+      description: Patch candidato (partial update)
+      parameters:
+      - description: Candidato ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Dados de candidatos para atualizar parcialmente
+        in: body
+        name: candidato
+        required: true
+        schema:
+          $ref: '#/definitions/talenthub.CandidatoUpdate'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Candidato atualizado
+          schema:
+            $ref: '#/definitions/http.candidatoDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Patch candidato
       tags:
       - Candidatos
     put:
@@ -580,6 +657,29 @@ paths:
       summary: Update candidato
       tags:
       - Candidatos
+  /rh_users:
+    get:
+      description: Lista RH Users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lista de usuários RH
+          schema:
+            items:
+              $ref: '#/definitions/http.rhUserDTO'
+            type: array
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Lista RH Users
+      tags:
+      - RH Users
   /vaga:
     get:
       description: Lista Vagas
@@ -644,6 +744,28 @@ paths:
       tags:
       - Vagas
   /vaga/{id}:
+    delete:
+      description: Delete vaga
+      parameters:
+      - description: Vaga ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: Vaga deleted
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Error message
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Delete vaga
+      tags:
+      - Vagas
     get:
       description: Get Vaga By ID
       parameters:

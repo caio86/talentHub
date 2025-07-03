@@ -423,6 +423,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/http.ErrorResponse"
                         }
                     },
+                    "409": {
+                        "description": "email already exists",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
                     "500": {
                         "description": "Internal Error",
                         "schema": {
@@ -523,6 +529,98 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Patch candidato (partial update)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Candidatos"
+                ],
+                "summary": "Patch candidato",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Candidato ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Dados de candidatos para atualizar parcialmente",
+                        "name": "candidato",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/talenthub.CandidatoUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Candidato atualizado",
+                        "schema": {
+                            "$ref": "#/definitions/http.candidatoDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Mensagem de erro",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Error",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/rh_users": {
+            "get": {
+                "description": "Lista RH Users",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "RH Users"
+                ],
+                "summary": "Lista RH Users",
+                "responses": {
+                    "200": {
+                        "description": "Lista de usuários RH",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/http.rhUserDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Mensagem de erro",
                         "schema": {
                             "$ref": "#/definitions/http.ErrorResponse"
                         }
@@ -792,6 +890,39 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "description": "Delete vaga",
+                "tags": [
+                    "Vagas"
+                ],
+                "summary": "Delete vaga",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Vaga ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Vaga deleted"
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Error message",
+                        "schema": {
+                            "$ref": "#/definitions/http.ErrorResponse"
+                        }
+                    }
+                }
             }
         }
     },
@@ -807,14 +938,14 @@ const docTemplate = `{
         "http.applicationDTO": {
             "type": "object",
             "properties": {
-                "application_date": {
+                "applicationDate": {
                     "type": "string"
                 },
-                "candidate_id": {
-                    "type": "integer"
+                "candidateId": {
+                    "type": "string"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "score": {
                     "type": "integer"
@@ -822,8 +953,8 @@ const docTemplate = `{
                 "status": {
                     "type": "string"
                 },
-                "vacancy_id": {
-                    "type": "integer"
+                "vacancyId": {
+                    "type": "string"
                 }
             }
         },
@@ -842,20 +973,23 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
-                "experience": {
+                "experiences": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/http.experience"
                     }
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "interests": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
+                },
+                "is_reserve": {
+                    "type": "boolean"
                 },
                 "linkedin": {
                     "type": "string"
@@ -958,6 +1092,15 @@ const docTemplate = `{
                 "area": {
                     "type": "string"
                 },
+                "benefits": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "company": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
@@ -969,6 +1112,9 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "salary": {
+                    "type": "string"
                 },
                 "title": {
                     "type": "string"
@@ -984,9 +1130,6 @@ const docTemplate = `{
                 "course": {
                     "type": "string"
                 },
-                "education_id": {
-                    "type": "integer"
-                },
                 "institution": {
                     "type": "string"
                 },
@@ -1000,9 +1143,6 @@ const docTemplate = `{
             "properties": {
                 "company": {
                     "type": "string"
-                },
-                "experience_id": {
-                    "type": "integer"
                 },
                 "role": {
                     "type": "string"
@@ -1057,8 +1197,11 @@ const docTemplate = `{
         "http.registerApplicationDTO": {
             "type": "object",
             "properties": {
-                "candidate_id": {
-                    "type": "integer"
+                "applicationDate": {
+                    "type": "string"
+                },
+                "candidateId": {
+                    "type": "string"
                 },
                 "score": {
                     "type": "integer"
@@ -1066,8 +1209,25 @@ const docTemplate = `{
                 "status": {
                     "type": "string"
                 },
-                "vacancy_id": {
-                    "type": "integer"
+                "vacancyId": {
+                    "type": "string"
+                }
+            }
+        },
+        "http.rhUserDTO": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
                 }
             }
         },
@@ -1077,19 +1237,28 @@ const docTemplate = `{
                 "area": {
                     "type": "string"
                 },
+                "benefits": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "company": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "is_active": {
+                "isActive": {
                     "type": "boolean"
                 },
                 "location": {
                     "type": "string"
                 },
-                "posted_date": {
+                "postedDate": {
                     "type": "string"
                 },
                 "requirements": {
@@ -1097,6 +1266,9 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "salary": {
+                    "type": "string"
                 },
                 "title": {
                     "type": "string"
@@ -1143,10 +1315,22 @@ const docTemplate = `{
                 "area": {
                     "type": "string"
                 },
+                "benefits": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "company": {
+                    "type": "string"
+                },
                 "description": {
                     "type": "string"
                 },
                 "location": {
+                    "type": "string"
+                },
+                "salary": {
                     "type": "string"
                 },
                 "title": {
