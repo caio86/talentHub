@@ -35,6 +35,7 @@ func NewServer() *Server {
 	s.loadCandidatoRoutes(router)
 	s.loadVagaRoutes(router)
 	s.loadApplicationRoutes(router)
+	s.loadRHUserRoutes(router)
 
 	s.router.Handle("/api/v1/", http.StripPrefix("/api/v1", router))
 	s.router.Handle("/api/v1/docs/", httpSwagger.WrapHandler)

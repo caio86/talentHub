@@ -13,6 +13,7 @@ func (s *Server) loadCandidatoRoutes(r *http.ServeMux) {
 	r.HandleFunc("GET /candidato", s.handleCandidatoList)
 	r.HandleFunc("POST /candidato", s.handleCandidatoCreate)
 	r.HandleFunc("PUT /candidato/{id}", s.handleCandidatoUpdate)
+	r.HandleFunc("PATCH /candidato/{id}", s.handleCandidatoPatch)
 }
 
 // DTO
@@ -23,34 +24,33 @@ type listCandidatoResponse struct {
 }
 
 type experience struct {
-	ID      int    `json:"experience_id"`
 	Company string `json:"company"`
 	Role    string `json:"role"`
 	Years   int    `json:"years"`
 }
 
 type education struct {
-	ID          int    `json:"education_id"`
 	Institution string `json:"institution"`
 	Course      string `json:"course"`
 	Level       string `json:"level"`
 }
 
 type candidatoDTO struct {
-	ID       int    `json:"id"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Phone    string `json:"phone,omitempty"`
-	Address  string `json:"address,omitempty"`
-	Linkedin string `json:"linkedin,omitempty"`
+	ID       string  `json:"id"`
+	Name     string  `json:"name"`
+	Email    string  `json:"email"`
+	Password string  `json:"password"`
+	Phone    string  `json:"phone,omitempty"`
+	Address  string  `json:"address,omitempty"`
+	Linkedin *string `json:"linkedin"`
 
-	Experiences []*experience `json:"experience"`
+	Experiences []*experience `json:"experiences"`
 	Education   []*education  `json:"education"`
 	Skills      []string      `json:"skills"`
 	Interests   []string      `json:"interests"`
 
-	ResumeLink string `json:"resume_pdf_path,omitempty"`
+	ResumeLink *string `json:"resume_pdf_path"`
+	IsReserve  bool    `json:"is_reserve"`
 }
 
 type createCandidatoDTO struct {
@@ -83,8 +83,8 @@ func (d *candidatoDTO) toDomain() *talenthub.Candidato {
 	canEdu := make([]*talenthub.Education, len(d.Education))
 	for k, v := range d.Education {
 		canEdu[k] = &talenthub.Education{
-			ID:          v.ID,
-			CandidateID: d.ID,
+			ID:          0, // será definido pelo banco
+			CandidateID: 0, // será definido pelo banco
 			Institution: v.Institution,
 			Course:      v.Course,
 			Level:       v.Level,
@@ -94,29 +94,41 @@ func (d *candidatoDTO) toDomain() *talenthub.Candidato {
 	canExp := make([]*talenthub.Experience, len(d.Experiences))
 	for k, v := range d.Experiences {
 		canExp[k] = &talenthub.Experience{
-			ID:          v.ID,
-			CandidateID: d.ID,
+			ID:          0, // será definido pelo banco
+			CandidateID: 0, // será definido pelo banco
 			Company:     v.Company,
 			Role:        v.Role,
 			Years:       v.Years,
 		}
 	}
 
+	id, _ := strconv.Atoi(d.ID)
+
+	linkedin := ""
+	if d.Linkedin != nil {
+		linkedin = *d.Linkedin
+	}
+
+	resumeLink := ""
+	if d.ResumeLink != nil {
+		resumeLink = *d.ResumeLink
+	}
+
 	return &talenthub.Candidato{
-		ID:       d.ID,
+		ID:       id,
 		Name:     d.Name,
 		Email:    d.Email,
 		Password: d.Password,
 		Phone:    d.Phone,
 		Address:  d.Address,
-		Linkedin: d.Linkedin,
+		Linkedin: linkedin,
 
 		Experiences: canExp,
 		Education:   canEdu,
 		Skills:      d.Skills,
 		Interests:   d.Interests,
 
-		ResumeLink: d.ResumeLink,
+		ResumeLink: resumeLink,
 	}
 }
 
@@ -124,7 +136,6 @@ func (d *candidatoDTO) fromDomain(domain *talenthub.Candidato) {
 	canEdu := make([]*education, len(domain.Education))
 	for k, v := range domain.Education {
 		canEdu[k] = &education{
-			ID:          v.ID,
 			Institution: v.Institution,
 			Course:      v.Course,
 			Level:       v.Level,
@@ -134,27 +145,39 @@ func (d *candidatoDTO) fromDomain(domain *talenthub.Candidato) {
 	canExp := make([]*experience, len(domain.Experiences))
 	for k, v := range domain.Experiences {
 		canExp[k] = &experience{
-			ID:      v.ID,
 			Company: v.Company,
 			Role:    v.Role,
 			Years:   v.Years,
 		}
 	}
 
-	d.ID = domain.ID
+	d.ID = strconv.Itoa(domain.ID)
 	d.Name = domain.Name
 	d.Email = domain.Email
 	d.Password = domain.Password
 	d.Phone = domain.Phone
 	d.Address = domain.Address
-	d.Linkedin = domain.Linkedin
+
+	if domain.Linkedin != "" {
+		d.Linkedin = &domain.Linkedin
+	} else {
+		d.Linkedin = nil
+	}
 
 	d.Experiences = canExp
 	d.Education = canEdu
 	d.Skills = domain.Skills
 	d.Interests = domain.Interests
 
-	d.ResumeLink = domain.ResumeLink
+	if domain.ResumeLink != "" {
+		d.ResumeLink = &domain.ResumeLink
+	} else {
+		d.ResumeLink = nil
+	}
+
+	// Por enquanto, vamos definir is_reserve como false por padrão
+	// Isso pode ser ajustado conforme a lógica de negócio
+	d.IsReserve = false
 }
 
 func (d *createCandidatoDTO) toDomain() *talenthub.Candidato {
@@ -268,7 +291,7 @@ func (s *Server) handleCandidatoList(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	candidates, total, err := s.CandidatoService.FindCandidatos(r.Context(), filter)
+	candidates, _, err := s.CandidatoService.FindCandidatos(r.Context(), filter)
 	if err != nil {
 		Error(w, r, err)
 		return
@@ -282,10 +305,7 @@ func (s *Server) handleCandidatoList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(listCandidatoResponse{
-		Candidatos: res,
-		Total:      total,
-	})
+	json.NewEncoder(w).Encode(res)
 }
 
 // @summary Create candidato
@@ -366,3 +386,43 @@ func (s *Server) handleCandidatoUpdate(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 	json.NewEncoder(w).Encode(res)
 }
+
+// @summary Patch candidato
+// @description Patch candidato (partial update)
+// @router /candidato/{id} [patch]
+// @tags Candidatos
+// @accept json
+// @produce json
+// @param id path int true "Candidato ID"
+// @param candidato body talenthub.CandidatoUpdate true "Dados de candidatos para atualizar parcialmente"
+// @success 202 {object} http.candidatoDTO "Candidato atualizado"
+// @success 400 {object} http.ErrorResponse "Bad request"
+// @success 404 {object} http.ErrorResponse "Mensagem de erro"
+// @success 500 {object} http.ErrorResponse "Internal Error"
+func (s *Server) handleCandidatoPatch(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		Error(w, r, talenthub.Errorf(talenthub.EINVALID, "invalid id"))
+		return
+	}
+
+	var upd talenthub.CandidatoUpdate
+	if err := json.NewDecoder(r.Body).Decode(&upd); err != nil {
+		Error(w, r, talenthub.Errorf(talenthub.EINVALID, "invalid json body"))
+		return
+	}
+
+	updated, err := s.CandidatoService.UpdateCandidato(r.Context(), id, upd)
+	if err != nil {
+		Error(w, r, err)
+		return
+	}
+
+	var res candidatoDTO
+	res.fromDomain(updated)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusAccepted)
+	json.NewEncoder(w).Encode(res)
+}
+
