@@ -19,7 +19,15 @@ func NewCandidatoService(db *DB) *CandidatoService {
 }
 
 func (s *CandidatoService) FindCandidatoByID(ctx context.Context, id int) (*talenthub.Candidato, error) {
-	result, err := s.repo.GetCandidateByID(ctx, int32(id))
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	repoTx := s.repo.WithTx(tx)
+
+	result, err := repoTx.GetCandidateByID(ctx, int32(id))
 	if err != nil {
 		return nil, talenthub.Errorf(talenthub.ENOTFOUND, "candidato not found")
 	}
@@ -46,7 +54,7 @@ func (s *CandidatoService) FindCandidatoByID(ctx context.Context, id int) (*tale
 	}
 
 	// educations := make([]*talenthub.Education)
-	if resEducation, err := s.repo.GetCandidateEducations(ctx, int32(id)); err != nil {
+	if resEducation, err := repoTx.GetCandidateEducations(ctx, int32(id)); err != nil {
 		candidate.Education = make([]*talenthub.Education, 0)
 	} else {
 		candidate.Education = make([]*talenthub.Education, len(resEducation))
@@ -62,7 +70,7 @@ func (s *CandidatoService) FindCandidatoByID(ctx context.Context, id int) (*tale
 	}
 
 	// experiences := make([]*talenthub.Experience)
-	if resExperiences, err := s.repo.GetCandidateExperiences(ctx, int32(id)); err != nil {
+	if resExperiences, err := repoTx.GetCandidateExperiences(ctx, int32(id)); err != nil {
 		candidate.Experiences = make([]*talenthub.Experience, 0)
 	} else {
 		candidate.Experiences = make([]*talenthub.Experience, len(resExperiences))
@@ -78,7 +86,7 @@ func (s *CandidatoService) FindCandidatoByID(ctx context.Context, id int) (*tale
 	}
 
 	// Candiate Skills
-	if resSkills, err := s.repo.GetCandidateSkills(ctx, int32(id)); err != nil {
+	if resSkills, err := repoTx.GetCandidateSkills(ctx, int32(id)); err != nil {
 		candidate.Skills = make([]string, 0)
 	} else {
 		candidate.Skills = make([]string, len(resSkills))
@@ -88,7 +96,7 @@ func (s *CandidatoService) FindCandidatoByID(ctx context.Context, id int) (*tale
 	}
 
 	// Candidate Interests
-	if resInterests, err := s.repo.GetCandidateInterests(ctx, int32(id)); err != nil {
+	if resInterests, err := repoTx.GetCandidateInterests(ctx, int32(id)); err != nil {
 		candidate.Interests = make([]string, 0)
 	} else {
 		candidate.Interests = make([]string, len(resInterests))
@@ -101,25 +109,32 @@ func (s *CandidatoService) FindCandidatoByID(ctx context.Context, id int) (*tale
 }
 
 func (s *CandidatoService) FindCandidatos(ctx context.Context, filter talenthub.CandidatoFilter) ([]*talenthub.Candidato, int, error) {
-	var err error
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer tx.Rollback(ctx)
+
+	repoTx := s.repo.WithTx(tx)
+
 	arg := repository.ListCandidatesParams{
 		Limit:  filter.Limit,
 		Offset: filter.Offset * filter.Limit,
 	}
 
-	total, err := s.repo.CountCandidates(ctx)
+	total, err := repoTx.CountCandidates(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
 
 	var candidatos []repository.Candidate
 	if arg.Limit == 0 {
-		candidatos, err = s.repo.ListAllCandidates(ctx)
+		candidatos, err = repoTx.ListAllCandidates(ctx)
 		if err != nil {
 			return nil, 0, err
 		}
 	} else {
-		candidatos, err = s.repo.ListCandidates(ctx, arg)
+		candidatos, err = repoTx.ListCandidates(ctx, arg)
 		if err != nil {
 			return nil, 0, err
 		}
@@ -149,7 +164,7 @@ func (s *CandidatoService) FindCandidatos(ctx context.Context, filter talenthub.
 		}
 
 		// educations := make([]*talenthub.Education)
-		if resEducation, err := s.repo.GetCandidateEducations(ctx, int32(v.ID)); err != nil {
+		if resEducation, err := repoTx.GetCandidateEducations(ctx, int32(v.ID)); err != nil {
 			res[i].Education = make([]*talenthub.Education, 0)
 		} else {
 			res[i].Education = make([]*talenthub.Education, len(resEducation))
@@ -165,7 +180,7 @@ func (s *CandidatoService) FindCandidatos(ctx context.Context, filter talenthub.
 		}
 
 		// experiences := make([]*talenthub.Experience)
-		if resExperiences, err := s.repo.GetCandidateExperiences(ctx, int32(v.ID)); err != nil {
+		if resExperiences, err := repoTx.GetCandidateExperiences(ctx, int32(v.ID)); err != nil {
 			res[i].Experiences = make([]*talenthub.Experience, 0)
 		} else {
 			res[i].Experiences = make([]*talenthub.Experience, len(resExperiences))
@@ -181,7 +196,7 @@ func (s *CandidatoService) FindCandidatos(ctx context.Context, filter talenthub.
 		}
 
 		// Candiate Skills
-		if resSkills, err := s.repo.GetCandidateSkills(ctx, int32(v.ID)); err != nil {
+		if resSkills, err := repoTx.GetCandidateSkills(ctx, int32(v.ID)); err != nil {
 			res[i].Skills = make([]string, 0)
 		} else {
 			res[i].Skills = make([]string, len(resSkills))
@@ -191,7 +206,7 @@ func (s *CandidatoService) FindCandidatos(ctx context.Context, filter talenthub.
 		}
 
 		// Candidate Interests
-		if resInterests, err := s.repo.GetCandidateInterests(ctx, int32(v.ID)); err != nil {
+		if resInterests, err := repoTx.GetCandidateInterests(ctx, int32(v.ID)); err != nil {
 			res[i].Interests = make([]string, 0)
 		} else {
 			res[i].Interests = make([]string, len(resInterests))

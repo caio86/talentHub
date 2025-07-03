@@ -20,7 +20,15 @@ func NewVagaService(db *DB) *VagaService {
 }
 
 func (s *VagaService) FindVagaByID(ctx context.Context, id int) (*talenthub.Vaga, error) {
-	result, err := s.repo.GetFullVacancyByID(ctx, int32(id))
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	repoTx := s.repo.WithTx(tx)
+
+	result, err := repoTx.GetFullVacancyByID(ctx, int32(id))
 	if err != nil {
 		return nil, talenthub.Errorf(talenthub.ENOTFOUND, "vaga not found")
 	}
@@ -47,7 +55,7 @@ func (s *VagaService) FindVagaByID(ctx context.Context, id int) (*talenthub.Vaga
 		res.Location = *result.Location
 	}
 
-	requirements, _ := s.repo.GetRequirementsByVacancyID(ctx, int32(id))
+	requirements, _ := repoTx.GetRequirementsByVacancyID(ctx, int32(id))
 	if requirements == nil {
 		res.Requirements = make([]string, 0)
 	} else {
@@ -354,43 +362,73 @@ func (s *VagaService) UpdateVaga(ctx context.Context, id int, upd talenthub.Vaga
 }
 
 func (s *VagaService) OpenVaga(ctx context.Context, id int) error {
-	_, err := s.repo.GetVacancyByID(ctx, int32(id))
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	repoTx := s.repo.WithTx(tx)
+
+	_, err = repoTx.GetVacancyByID(ctx, int32(id))
 	if err != nil {
 		return talenthub.Errorf(talenthub.ENOTFOUND, "vaga not found")
 	}
 
-	err = s.repo.OpenVacancy(ctx, int32(id))
+	err = repoTx.OpenVacancy(ctx, int32(id))
 	if err != nil {
 		return talenthub.Errorf(talenthub.EINTERNAL, "internal error %s", err)
 	}
+
+	tx.Commit(ctx)
 
 	return nil
 }
 
 func (s *VagaService) CloseVaga(ctx context.Context, id int) error {
-	_, err := s.repo.GetVacancyByID(ctx, int32(id))
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	repoTx := s.repo.WithTx(tx)
+
+	_, err = repoTx.GetVacancyByID(ctx, int32(id))
 	if err != nil {
 		return talenthub.Errorf(talenthub.ENOTFOUND, "vaga not found")
 	}
 
-	err = s.repo.CloseVacancy(ctx, int32(id))
+	err = repoTx.CloseVacancy(ctx, int32(id))
 	if err != nil {
 		return talenthub.Errorf(talenthub.EINTERNAL, "internal error %s", err)
 	}
+
+	tx.Commit(ctx)
 
 	return nil
 }
 
 func (s *VagaService) DeleteVaga(ctx context.Context, id int) error {
-	_, err := s.repo.GetVacancyByID(ctx, int32(id))
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	repoTx := s.repo.WithTx(tx)
+
+	_, err = repoTx.GetVacancyByID(ctx, int32(id))
 	if err != nil {
 		return talenthub.Errorf(talenthub.ENOTFOUND, "vaga not found")
 	}
 
-	err = s.repo.DeleteVacancy(ctx, int32(id))
+	err = repoTx.DeleteVacancy(ctx, int32(id))
 	if err != nil {
 		return talenthub.Errorf(talenthub.EINTERNAL, "internal error %s", err)
 	}
+
+	tx.Commit(ctx)
 
 	return nil
 }

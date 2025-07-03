@@ -22,7 +22,15 @@ func NewApplicationService(db *DB) *ApplicationService {
 }
 
 func (s *ApplicationService) FindApplicationByID(ctx context.Context, id int) (*talenthub.Application, error) {
-	result, err := s.repo.GetFullApplicationById(ctx, int32(id))
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	repoTx := s.repo.WithTx(tx)
+
+	result, err := repoTx.GetFullApplicationById(ctx, int32(id))
 	if err != nil {
 		return nil, talenthub.Errorf(talenthub.ENOTFOUND, "application not found")
 	}
@@ -43,23 +51,29 @@ func (s *ApplicationService) FindApplicationByID(ctx context.Context, id int) (*
 }
 
 func (s *ApplicationService) FindApplications(ctx context.Context, filter talenthub.ApplicationFilter) ([]*talenthub.Application, int, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer tx.Rollback(ctx)
+
 	var arg repository.ListFullApplicationsParams
 
 	arg.Limit = filter.Limit
 	arg.Offset = filter.Offset * arg.Limit
 
 	if arg.Limit <= 0 {
-		result, total, err := s.findAllApplications(ctx)
+		result, total, err := s.findAllApplications(ctx, tx)
 		if err != nil {
-			return nil, 0, talenthub.Errorf(talenthub.EINTERNAL, "internal server error: %s", err)
+			return nil, 0, err
 		}
 
 		return result, total, nil
 
 	} else {
-		result, total, err := s.findApplications(ctx, arg)
+		result, total, err := s.findApplications(ctx, tx, arg)
 		if err != nil {
-			return nil, 0, talenthub.Errorf(talenthub.EINTERNAL, "internal server error: %s", err)
+			return nil, 0, err
 		}
 
 		return result, total, nil
@@ -67,13 +81,15 @@ func (s *ApplicationService) FindApplications(ctx context.Context, filter talent
 	}
 }
 
-func (s *ApplicationService) findAllApplications(ctx context.Context) ([]*talenthub.Application, int, error) {
-	total, err := s.repo.CountApplications(ctx)
+func (s *ApplicationService) findAllApplications(ctx context.Context, tx *Tx) ([]*talenthub.Application, int, error) {
+	repoTx := s.repo.WithTx(tx)
+
+	total, err := repoTx.CountApplications(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	result, err := s.repo.ListAllFullApplications(ctx)
+	result, err := repoTx.ListAllFullApplications(ctx)
 	if err != nil {
 		return nil, 0, talenthub.Errorf(talenthub.EINTERNAL, "internal server error: %s", err)
 	}
@@ -96,13 +112,15 @@ func (s *ApplicationService) findAllApplications(ctx context.Context) ([]*talent
 	return res, int(total), nil
 }
 
-func (s *ApplicationService) findApplications(ctx context.Context, arg repository.ListFullApplicationsParams) ([]*talenthub.Application, int, error) {
-	total, err := s.repo.CountApplications(ctx)
+func (s *ApplicationService) findApplications(ctx context.Context, tx *Tx, arg repository.ListFullApplicationsParams) ([]*talenthub.Application, int, error) {
+	repoTx := s.repo.WithTx(tx)
+
+	total, err := repoTx.CountApplications(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	result, err := s.repo.ListFullApplications(ctx, arg)
+	result, err := repoTx.ListFullApplications(ctx, arg)
 	if err != nil {
 		return nil, 0, talenthub.Errorf(talenthub.EINTERNAL, "internal server error: %s", err)
 	}
@@ -126,12 +144,20 @@ func (s *ApplicationService) findApplications(ctx context.Context, arg repositor
 }
 
 func (s *ApplicationService) SearchApplicationsByCandidateID(ctx context.Context, candidateID int) ([]*talenthub.Application, int, error) {
-	total, err := s.repo.CountApplications(ctx)
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer tx.Rollback(ctx)
+
+	repoTx := s.repo.WithTx(tx)
+
+	total, err := repoTx.CountApplications(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	result, err := s.repo.SearchApplicationsByCandidateId(ctx, int32(candidateID))
+	result, err := repoTx.SearchApplicationsByCandidateId(ctx, int32(candidateID))
 	if err != nil {
 		return nil, 0, talenthub.Errorf(talenthub.EINTERNAL, "internal server error: %s", err)
 	}
@@ -147,7 +173,7 @@ func (s *ApplicationService) SearchApplicationsByCandidateID(ctx context.Context
 		}
 
 		if v.StatusID != nil {
-			status, err := s.repo.GetApplicationStatusById(ctx, *v.StatusID)
+			status, err := repoTx.GetApplicationStatusById(ctx, *v.StatusID)
 			if err != nil {
 				return nil, 0, err
 			}
@@ -159,12 +185,20 @@ func (s *ApplicationService) SearchApplicationsByCandidateID(ctx context.Context
 }
 
 func (s *ApplicationService) SearchApplicationsByVacancyID(ctx context.Context, vacancyID int) ([]*talenthub.Application, int, error) {
-	total, err := s.repo.CountApplications(ctx)
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer tx.Rollback(ctx)
+
+	repoTx := s.repo.WithTx(tx)
+
+	total, err := repoTx.CountApplications(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	result, err := s.repo.SearchApplicationsByVacancyId(ctx, int32(vacancyID))
+	result, err := repoTx.SearchApplicationsByVacancyId(ctx, int32(vacancyID))
 	if err != nil {
 		return nil, 0, talenthub.Errorf(talenthub.EINTERNAL, "internal server error: %s", err)
 	}
@@ -180,7 +214,7 @@ func (s *ApplicationService) SearchApplicationsByVacancyID(ctx context.Context, 
 		}
 
 		if v.StatusID != nil {
-			status, err := s.repo.GetApplicationStatusById(ctx, *v.StatusID)
+			status, err := repoTx.GetApplicationStatusById(ctx, *v.StatusID)
 			if err != nil {
 				return nil, 0, err
 			}
@@ -211,7 +245,7 @@ func (s *ApplicationService) RegisterApplication(ctx context.Context, applicatio
 		StatusID:    &recebidoStatus.ID,
 	}
 
-	newApp, err := s.repo.RegisterApplication(ctx, arg)
+	newApp, err := repoTx.RegisterApplication(ctx, arg)
 	if err != nil {
 		return nil, err
 	}
@@ -230,15 +264,25 @@ func (s *ApplicationService) RegisterApplication(ctx context.Context, applicatio
 }
 
 func (s *ApplicationService) UnregisterApplication(ctx context.Context, id int) error {
-	_, err := s.repo.GetApplicationById(ctx, int32(id))
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	repoTx := s.repo.WithTx(tx)
+
+	_, err = repoTx.GetApplicationById(ctx, int32(id))
 	if err != nil {
 		return talenthub.Errorf(talenthub.ENOTFOUND, "application not found")
 	}
 
-	err = s.repo.UnregisterApplication(ctx, int32(id))
+	err = repoTx.UnregisterApplication(ctx, int32(id))
 	if err != nil {
 		return err
 	}
+
+	tx.Commit(ctx)
 
 	return nil
 }
