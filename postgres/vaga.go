@@ -58,13 +58,19 @@ func (s *VagaService) FindVagaByID(ctx context.Context, id int) (*talenthub.Vaga
 }
 
 func (s *VagaService) FindVagas(ctx context.Context, filter talenthub.VagaFilter) ([]*talenthub.Vaga, int, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer tx.Rollback(ctx)
+
 	var arg repository.ListVacanciesParams
 
 	arg.Limit = filter.Limit
 	arg.Offset = filter.Offset * arg.Limit
 
 	if arg.Limit <= 0 {
-		result, total, err := s.findAllVagas(ctx)
+		result, total, err := s.findAllVagas(ctx, tx)
 		if err != nil {
 			return nil, 0, talenthub.Errorf(talenthub.EINTERNAL, "internal server error: %s", err)
 		}
@@ -72,7 +78,7 @@ func (s *VagaService) FindVagas(ctx context.Context, filter talenthub.VagaFilter
 		return result, total, nil
 
 	} else {
-		result, total, err := s.findVagas(ctx, arg)
+		result, total, err := s.findVagas(ctx, tx, arg)
 		if err != nil {
 			return nil, 0, talenthub.Errorf(talenthub.EINTERNAL, "internal server error: %s", err)
 		}
@@ -82,13 +88,15 @@ func (s *VagaService) FindVagas(ctx context.Context, filter talenthub.VagaFilter
 	}
 }
 
-func (s *VagaService) findAllVagas(ctx context.Context) ([]*talenthub.Vaga, int, error) {
-	total, err := s.repo.CountVacancies(ctx)
+func (s *VagaService) findAllVagas(ctx context.Context, tx *Tx) ([]*talenthub.Vaga, int, error) {
+	repoTx := s.repo.WithTx(tx)
+
+	total, err := repoTx.CountVacancies(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	result, err := s.repo.ListAllVacancies(ctx)
+	result, err := repoTx.ListAllVacancies(ctx)
 	if err != nil {
 		return nil, 0, talenthub.Errorf(talenthub.EINTERNAL, "internal server error: %s", err)
 	}
@@ -117,7 +125,7 @@ func (s *VagaService) findAllVagas(ctx context.Context) ([]*talenthub.Vaga, int,
 			res[i].Location = *v.Location
 		}
 
-		requirements, _ := s.repo.GetRequirementsByVacancyID(ctx, int32(v.ID))
+		requirements, _ := repoTx.GetRequirementsByVacancyID(ctx, int32(v.ID))
 		if requirements == nil {
 			res[i].Requirements = make([]string, 0)
 		} else {
@@ -128,13 +136,15 @@ func (s *VagaService) findAllVagas(ctx context.Context) ([]*talenthub.Vaga, int,
 	return res, int(total), nil
 }
 
-func (s *VagaService) findVagas(ctx context.Context, arg repository.ListVacanciesParams) ([]*talenthub.Vaga, int, error) {
-	total, err := s.repo.CountVacancies(ctx)
+func (s *VagaService) findVagas(ctx context.Context, tx *Tx, arg repository.ListVacanciesParams) ([]*talenthub.Vaga, int, error) {
+	repoTx := s.repo.WithTx(tx)
+
+	total, err := repoTx.CountVacancies(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	result, err := s.repo.ListVacancies(ctx, arg)
+	result, err := repoTx.ListVacancies(ctx, arg)
 	if err != nil {
 		return nil, 0, talenthub.Errorf(talenthub.EINTERNAL, "internal server error: %s", err)
 	}
@@ -163,7 +173,7 @@ func (s *VagaService) findVagas(ctx context.Context, arg repository.ListVacancie
 			res[i].Location = *v.Location
 		}
 
-		requirements, _ := s.repo.GetRequirementsByVacancyID(ctx, int32(v.ID))
+		requirements, _ := repoTx.GetRequirementsByVacancyID(ctx, int32(v.ID))
 		if requirements == nil {
 			res[i].Requirements = make([]string, 0)
 		} else {
@@ -384,4 +394,3 @@ func (s *VagaService) DeleteVaga(ctx context.Context, id int) error {
 
 	return nil
 }
-
