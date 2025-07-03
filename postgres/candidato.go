@@ -59,6 +59,50 @@ func (s *CandidatoService) FindCandidatoByID(ctx context.Context, id int) (*tale
 	return candidate, nil
 }
 
+func (s *CandidatoService) FindCandidatoByEmail(ctx context.Context, email string) (*talenthub.Candidato, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	repoTx := s.repo.WithTx(tx)
+
+	if _, err := mail.ParseAddress(email); err != nil {
+		return nil, talenthub.Errorf(talenthub.EINVALID, "email invalid")
+	}
+
+	result, err := repoTx.GetCandidateByEmail(ctx, email)
+	if err != nil {
+		return nil, talenthub.Errorf(talenthub.ENOTFOUND, "candidato not found")
+	}
+
+	candidate := &talenthub.Candidato{
+		ID:       int(result.ID),
+		Name:     result.Name,
+		Email:    result.Email,
+		Password: result.Password,
+	}
+
+	// Checking for nils
+	if result.Phone != nil {
+		candidate.Phone = *result.Phone
+	}
+	if result.Address != nil {
+		candidate.Address = *result.Address
+	}
+	if result.Linkedin != nil {
+		candidate.Linkedin = *result.Linkedin
+	}
+	if result.ResumeUrl != nil {
+		candidate.ResumeLink = *result.ResumeUrl
+	}
+
+	s.attachCandidateAssociations(ctx, tx, candidate)
+
+	return candidate, nil
+}
+
 func (s *CandidatoService) FindCandidatos(ctx context.Context, filter talenthub.CandidatoFilter) ([]*talenthub.Candidato, int, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {

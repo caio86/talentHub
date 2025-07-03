@@ -262,6 +262,7 @@ func (s *Server) handleCandidatoGet(w http.ResponseWriter, r *http.Request) {
 // @produce json
 // @param limit query int false "Pagination limit"
 // @param offset query int false "Pagination offset"
+// @param email query string false "Email to search"
 // @success 200 {object} http.listCandidatoResponse "Lista de candidatos"
 // @success 400 {object} http.ErrorResponse "Bad request"
 // @success 404 {object} http.ErrorResponse "Mensagem de erro"
@@ -291,10 +292,22 @@ func (s *Server) handleCandidatoList(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	candidates, _, err := s.CandidatoService.FindCandidatos(r.Context(), filter)
-	if err != nil {
-		Error(w, r, err)
-		return
+	var candidates []*talenthub.Candidato
+	var err error
+	if email := queryParams.Get("email"); email != "" {
+		candidato, err := s.CandidatoService.FindCandidatoByEmail(r.Context(), email)
+		if err != nil {
+			Error(w, r, err)
+			return
+		}
+
+		candidates = []*talenthub.Candidato{candidato}
+	} else {
+		candidates, _, err = s.CandidatoService.FindCandidatos(r.Context(), filter)
+		if err != nil {
+			Error(w, r, err)
+			return
+		}
 	}
 
 	res := make([]*candidatoDTO, len(candidates))
@@ -425,4 +438,3 @@ func (s *Server) handleCandidatoPatch(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 	json.NewEncoder(w).Encode(res)
 }
-

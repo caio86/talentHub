@@ -38,6 +38,7 @@ func (c *Candidato) Validate() error {
 
 type CandidatoService interface {
 	FindCandidatoByID(ctx context.Context, id int) (*Candidato, error)
+	FindCandidatoByEmail(ctx context.Context, email string) (*Candidato, error)
 	FindCandidatos(ctx context.Context, filter CandidatoFilter) ([]*Candidato, int, error)
 	CreateCandidato(ctx context.Context, candidato *Candidato) (*Candidato, error)
 	UpdateCandidato(ctx context.Context, id int, upd CandidatoUpdate) (*Candidato, error)
