@@ -12,6 +12,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 //go:embed migrations/*.sql
@@ -61,7 +62,7 @@ func (c *DBConfig) Validate() error {
 }
 
 type DB struct {
-	conn *pgx.Conn
+	conn *pgxpool.Pool
 	*DBConfig
 }
 
@@ -78,7 +79,7 @@ func (db *DB) Connect() error {
 		return err
 	}
 
-	conn, err := pgx.Connect(context.Background(), db.URL())
+	conn, err := pgxpool.New(context.Background(), db.URL())
 	if err != nil {
 		return talenthub.Errorf(talenthub.EINTERNAL, "%s", err)
 	}
