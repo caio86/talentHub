@@ -15,8 +15,9 @@ type Server struct {
 	Addr string
 
 	// Services
-	CandidatoService talenthub.CandidatoService
-	VagaService      talenthub.VagaService
+	CandidatoService   talenthub.CandidatoService
+	VagaService        talenthub.VagaService
+	ApplicationService talenthub.ApplicationService
 }
 
 // @title talentHub API
@@ -33,6 +34,8 @@ func NewServer() *Server {
 	// Loading routes
 	s.loadCandidatoRoutes(router)
 	s.loadVagaRoutes(router)
+	s.loadApplicationRoutes(router)
+	s.loadRHUserRoutes(router)
 
 	s.router.Handle("/api/v1/", http.StripPrefix("/api/v1", router))
 	s.router.Handle("/api/v1/docs/", httpSwagger.WrapHandler)
@@ -40,6 +43,7 @@ func NewServer() *Server {
 	// Setting middlewares
 	middlewares := createMiddlewares(
 		s.logging,
+		s.recoverPanic,
 		s.cors,
 	)
 

@@ -13,28 +13,95 @@ func (s *Server) loadVagaRoutes(r *http.ServeMux) {
 	r.HandleFunc("GET /vaga", s.handleVagaList)
 	r.HandleFunc("POST /vaga", s.handleVagaCreate)
 	r.HandleFunc("PUT /vaga/{id}", s.handleVagaUpdate)
+	r.HandleFunc("DELETE /vaga/{id}", s.handleVagaDelete)
+	r.HandleFunc("POST /vaga/open/{id}", s.handleVagaOpen)
+	r.HandleFunc("POST /vaga/close/{id}", s.handleVagaClose)
 }
+
+// DTO
 
 type vagaDTO struct {
-	ID          int    `json:"-"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Open        bool   `json:"open"`
+	ID           int      `json:"id"`
+	Title        string   `json:"title"`
+	Description  string   `json:"description"`
+	Area         string   `json:"area"`
+	Type         string   `json:"type"`
+	Location     string   `json:"location"`
+	Requirements []string `json:"requirements"`
+	Benefits     []string `json:"benefits"`
+	Salary       *string  `json:"salary,omitempty"`
+	Company      string   `json:"company"`
+	PostedDate   string   `json:"postedDate"`
+	IsActive     bool     `json:"isActive"`
 }
 
-func (d *vagaDTO) toDomain() *talenthub.Vaga {
-	return &talenthub.Vaga{
-		ID:          d.ID,
-		Name:        d.Name,
-		Description: d.Description,
-		Open:        d.Open,
-	}
+type createVagaDTO struct {
+	Title       string   `json:"title"`
+	Description string   `json:"description,omitempty"`
+	Area        string   `json:"area,omitempty"`
+	Type        string   `json:"type,omitempty"`
+	Location    string   `json:"location,omitempty"`
+	Requirements []string `json:"requirements"`
+	Benefits    []string `json:"benefits"`
+	Salary      *string  `json:"salary,omitempty"`
+	Company     string   `json:"company"`
 }
 
 type listVagaResponse struct {
 	Vagas []*vagaDTO `json:"vagas"`
 	Total int        `json:"total"`
 }
+
+// DTO Helpers
+
+func (d *vagaDTO) toDomain() *talenthub.Vaga {
+	return &talenthub.Vaga{
+		ID:           d.ID,
+		Title:        d.Title,
+		Description:  d.Description,
+		IsActive:     d.IsActive,
+		Area:         d.Area,
+		Type:         d.Type,
+		Location:     d.Location,
+		Requirements: d.Requirements,
+		Benefits:     d.Benefits,
+		Salary:       d.Salary,
+		Company:      d.Company,
+	}
+}
+
+func (d *vagaDTO) fromDomain(domain *talenthub.Vaga) {
+	d.ID = domain.ID
+	d.Title = domain.Title
+	d.Description = domain.Description
+	d.Area = domain.Area
+	d.Type = domain.Type
+	d.Location = domain.Location
+	d.Requirements = domain.Requirements
+	d.Benefits = domain.Benefits
+	d.Salary = domain.Salary
+	d.Company = domain.Company
+	d.PostedDate = domain.Posted_date.Format("2006-01-02")
+	d.IsActive = domain.IsActive
+}
+
+func (d *createVagaDTO) toDomain() *talenthub.Vaga {
+	return &talenthub.Vaga{
+		ID:          0,
+		Title:       d.Title,
+		Description: d.Description,
+		IsActive:    false,
+		Area:        d.Area,
+		Type:        d.Type,
+		Location:    d.Location,
+		Requirements: d.Requirements,
+		Benefits:    d.Benefits,
+		Salary:      d.Salary,
+		Company:     d.Company,
+	}
+}
+
+// HTTP Handlers
 
 // @summary Get Vaga By ID
 // @description Get Vaga By ID
@@ -43,6 +110,7 @@ type listVagaResponse struct {
 // @produce json
 // @param id path int true "Vaga ID"
 // @success 200 {object} http.vagaDTO "Vaga achada"
+// @success 400 {object} http.ErrorResponse "Bad request"
 // @success 404 {object} http.ErrorResponse "Mensagem de error"
 func (s *Server) handleVagaGet(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
@@ -57,8 +125,11 @@ func (s *Server) handleVagaGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var res vagaDTO
+	res.fromDomain(vaga)
+
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(vaga); err != nil {
+	if err := json.NewEncoder(w).Encode(res); err != nil {
 		return
 	}
 }
@@ -71,6 +142,7 @@ func (s *Server) handleVagaGet(w http.ResponseWriter, r *http.Request) {
 // @param limit query int false "Pagination limit"
 // @param offset query int false "Pagination offset"
 // @success 200 {object} http.listVagaResponse "Lista de vagas"
+// @success 400 {object} http.ErrorResponse "Bad request"
 // @success 404 {object} http.ErrorResponse "Mensagem de erro"
 func (s *Server) handleVagaList(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
@@ -98,7 +170,7 @@ func (s *Server) handleVagaList(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	vagas, total, err := s.VagaService.FindVagas(r.Context(), filter)
+	vagas, _, err := s.VagaService.FindVagas(r.Context(), filter)
 	if err != nil {
 		Error(w, r, err)
 		return
@@ -106,19 +178,13 @@ func (s *Server) handleVagaList(w http.ResponseWriter, r *http.Request) {
 
 	res := make([]*vagaDTO, len(vagas))
 	for k, v := range vagas {
-		res[k] = &vagaDTO{
-			ID:          v.ID,
-			Name:        v.Name,
-			Description: v.Description,
-			Open:        v.Open,
-		}
+		var dto vagaDTO
+		dto.fromDomain(v)
+		res[k] = &dto
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(listVagaResponse{
-		Vagas: res,
-		Total: total,
-	})
+	json.NewEncoder(w).Encode(res)
 }
 
 // @summary Create vaga
@@ -127,31 +193,41 @@ func (s *Server) handleVagaList(w http.ResponseWriter, r *http.Request) {
 // @tags Vagas
 // @accept json
 // @produce json
-// @param candidato body http.vagaDTO true "Vaga a ser criada"
+// @param candidato body http.createVagaDTO true "Vaga a ser criada"
 // @success 201 {object} http.vagaDTO "Vaga criada"
+// @success 400 {object} http.ErrorResponse "Bad request"
 // @success 404 {object} http.ErrorResponse "Mensagem de erro"
+// @success 500 {object} http.ErrorResponse "Internal Error"
 func (s *Server) handleVagaCreate(w http.ResponseWriter, r *http.Request) {
-	var vagadto *vagaDTO
+	var vagadto createVagaDTO
+
 	if err := json.NewDecoder(r.Body).Decode(&vagadto); err != nil {
-		Error(w, r, talenthub.Errorf(talenthub.EINVALID, "invalid json body"))
+		Error(w, r, talenthub.Errorf(talenthub.EINVALID, "invalid json body, %s", err))
 		return
 	}
 
-	vaga := vagadto.toDomain()
+	domain := vagadto.toDomain()
+	if err := domain.Validate(); err != nil {
+		Error(w, r, err)
+		return
+	}
 
-	err := s.VagaService.CreateVaga(r.Context(), vaga)
+	newVaga, err := s.VagaService.CreateVaga(r.Context(), domain)
 	if err != nil {
 		Error(w, r, err)
 		return
 	}
 
+	var res vagaDTO
+	res.fromDomain(newVaga)
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(vagadto)
+	json.NewEncoder(w).Encode(res)
 }
 
-// @summary Update candidato
-// @description Update candidato
+// @summary Update vaga
+// @description Update vaga
 // @router /vaga/{id} [put]
 // @tags Vagas
 // @accept json
@@ -159,7 +235,9 @@ func (s *Server) handleVagaCreate(w http.ResponseWriter, r *http.Request) {
 // @param id path int true "Vaga ID"
 // @param candidato body talenthub.VagaUpdate true "Dados de vagas para atualizar"
 // @success 202 {object} http.vagaDTO "Vaga atualizada"
+// @success 400 {object} http.ErrorResponse "Bad request"
 // @success 404 {object} http.ErrorResponse "Mensagem de erro"
+// @success 500 {object} http.ErrorResponse "Internal Error"
 func (s *Server) handleVagaUpdate(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil {
@@ -179,14 +257,84 @@ func (s *Server) handleVagaUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := &vagaDTO{
-		ID:          updated.ID,
-		Name:        updated.Name,
-		Description: updated.Description,
-		Open:        updated.Open,
-	}
+	var res vagaDTO
+	res.fromDomain(updated)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusAccepted)
 	json.NewEncoder(w).Encode(res)
 }
+
+// @summary Open vaga
+// @description Open vaga
+// @router /vaga/open/{id} [post]
+// @tags Vagas
+// @param id path int true "Vaga ID"
+// @success 204 "Vaga aberta"
+// @success 400 {object} http.ErrorResponse "Bad request"
+// @success 404 {object} http.ErrorResponse "Mensagem de erro"
+func (s *Server) handleVagaOpen(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		Error(w, r, talenthub.Errorf(talenthub.EINVALID, "invalid id"))
+		return
+	}
+
+	err = s.VagaService.OpenVaga(r.Context(), id)
+	if err != nil {
+		Error(w, r, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// @summary Close vaga
+// @description Close vaga
+// @router /vaga/close/{id} [post]
+// @tags Vagas
+// @param id path int true "Vaga ID"
+// @success 204 "Vaga closed"
+// @success 400 {object} http.ErrorResponse "Bad request"
+// @success 404 {object} http.ErrorResponse "Mensagem de erro"
+func (s *Server) handleVagaClose(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		Error(w, r, talenthub.Errorf(talenthub.EINVALID, "invalid id"))
+		return
+	}
+
+	err = s.VagaService.CloseVaga(r.Context(), id)
+	if err != nil {
+		Error(w, r, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+
+// @summary Delete vaga
+// @description Delete vaga
+// @router /vaga/{id} [delete]
+// @tags Vagas
+// @param id path int true "Vaga ID"
+// @success 204 "Vaga deleted"
+// @success 400 {object} http.ErrorResponse "Bad request"
+// @success 404 {object} http.ErrorResponse "Error message"
+func (s *Server) handleVagaDelete(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		Error(w, r, talenthub.Errorf(talenthub.EINVALID, "invalid id"))
+		return
+	}
+
+	err = s.VagaService.DeleteVaga(r.Context(), id)
+	if err != nil {
+		Error(w, r, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+

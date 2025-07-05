@@ -5,16 +5,156 @@ definitions:
       error:
         type: string
     type: object
+  http.applicationDTO:
+    properties:
+      applicationDate:
+        type: string
+      candidateId:
+        type: string
+      id:
+        type: string
+      score:
+        type: integer
+      status:
+        type: string
+      vacancyId:
+        type: string
+    type: object
   http.candidatoDTO:
     properties:
-      cpf:
+      address:
         type: string
+      education:
+        items:
+          $ref: '#/definitions/http.education'
+        type: array
       email:
+        type: string
+      experiences:
+        items:
+          $ref: '#/definitions/http.experience'
+        type: array
+      id:
+        type: string
+      interests:
+        items:
+          type: string
+        type: array
+      is_reserve:
+        type: boolean
+      linkedin:
         type: string
       name:
         type: string
+      password:
+        type: string
       phone:
         type: string
+      resume_pdf_path:
+        type: string
+      skills:
+        items:
+          type: string
+        type: array
+    type: object
+  http.createCandidatoDTO:
+    properties:
+      address:
+        type: string
+      education:
+        items:
+          properties:
+            course:
+              type: string
+            institution:
+              type: string
+            level:
+              type: string
+          type: object
+        type: array
+      email:
+        type: string
+      experience:
+        items:
+          properties:
+            company:
+              type: string
+            role:
+              type: string
+            years:
+              type: integer
+          type: object
+        type: array
+      interests:
+        items:
+          type: string
+        type: array
+      linkedin:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      resume_pdf_path:
+        type: string
+      skills:
+        items:
+          type: string
+        type: array
+    type: object
+  http.createVagaDTO:
+    properties:
+      area:
+        type: string
+      benefits:
+        items:
+          type: string
+        type: array
+      company:
+        type: string
+      description:
+        type: string
+      location:
+        type: string
+      requirements:
+        items:
+          type: string
+        type: array
+      salary:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  http.education:
+    properties:
+      course:
+        type: string
+      institution:
+        type: string
+      level:
+        type: string
+    type: object
+  http.experience:
+    properties:
+      company:
+        type: string
+      role:
+        type: string
+      years:
+        type: integer
+    type: object
+  http.listApplicationResponse:
+    properties:
+      applications:
+        items:
+          $ref: '#/definitions/http.applicationDTO'
+        type: array
+      total:
+        type: integer
     type: object
   http.listCandidatoResponse:
     properties:
@@ -34,45 +174,110 @@ definitions:
           $ref: '#/definitions/http.vagaDTO'
         type: array
     type: object
-  http.vagaDTO:
+  http.registerApplicationDTO:
     properties:
-      description:
+      applicationDate:
+        type: string
+      candidateId:
+        type: string
+      score:
+        type: integer
+      status:
+        type: string
+      vacancyId:
+        type: string
+    type: object
+  http.rhUserDTO:
+    properties:
+      email:
+        type: string
+      id:
         type: string
       name:
         type: string
-      open:
+      password:
+        type: string
+    type: object
+  http.vagaDTO:
+    properties:
+      area:
+        type: string
+      benefits:
+        items:
+          type: string
+        type: array
+      company:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      isActive:
         type: boolean
+      location:
+        type: string
+      postedDate:
+        type: string
+      requirements:
+        items:
+          type: string
+        type: array
+      salary:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
+    type: object
+  talenthub.ApplicationUpdate:
+    properties:
+      score:
+        type: integer
+      status:
+        type: string
     type: object
   talenthub.CandidatoUpdate:
     properties:
-      cpf:
+      address:
         type: string
-      email:
-        type: string
-      linkCurriculo:
+      linkedin:
         type: string
       name:
         type: string
       phone:
         type: string
+      resume_pdf_path:
+        type: string
     type: object
   talenthub.VagaUpdate:
     properties:
+      area:
+        type: string
+      benefits:
+        items:
+          type: string
+        type: array
+      company:
+        type: string
       description:
         type: string
-      name:
+      location:
         type: string
-      open:
-        type: boolean
+      salary:
+        type: string
+      title:
+        type: string
+      type:
+        type: string
     type: object
 info:
   contact: {}
   title: talentHub API
   version: "1.0"
 paths:
-  /candidato:
+  /application:
     get:
-      description: Lista Candidatos
+      description: Lista Applications
       parameters:
       - description: Pagination limit
         in: query
@@ -86,9 +291,229 @@ paths:
       - application/json
       responses:
         "200":
+          description: Lista de applications
+          schema:
+            $ref: '#/definitions/http.listApplicationResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Lista Applications
+      tags:
+      - Applications
+    post:
+      consumes:
+      - application/json
+      description: Register application
+      parameters:
+      - description: Application a ser registrada
+        in: body
+        name: candidato
+        required: true
+        schema:
+          $ref: '#/definitions/http.registerApplicationDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Application criada
+          schema:
+            $ref: '#/definitions/http.applicationDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Register application
+      tags:
+      - Applications
+  /application/{id}:
+    delete:
+      description: Unregister vaga
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: application unregistered
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Unregister application
+      tags:
+      - Applications
+    get:
+      description: Get Application By ID
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Application achada
+          schema:
+            $ref: '#/definitions/http.applicationDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Mensagem de error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Get Application By ID
+      tags:
+      - Applications
+    put:
+      consumes:
+      - application/json
+      description: Update application
+      parameters:
+      - description: Application ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Dados de applications para atualizar
+        in: body
+        name: candidato
+        required: true
+        schema:
+          $ref: '#/definitions/talenthub.ApplicationUpdate'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Application atualizada
+          schema:
+            $ref: '#/definitions/http.applicationDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Update application
+      tags:
+      - Applications
+  /application/candidato/{id}:
+    get:
+      description: Pesquisa applications por id da vaga
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lista de applications
+          schema:
+            $ref: '#/definitions/http.listApplicationResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Pesquisa applications por id da vaga
+      tags:
+      - Applications
+  /application/vaga/{id}:
+    get:
+      description: Pesquisa applications por id da vaga
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lista de applications
+          schema:
+            $ref: '#/definitions/http.listApplicationResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Pesquisa applications por id da vaga
+      tags:
+      - Applications
+  /candidato:
+    get:
+      description: Lista Candidatos
+      parameters:
+      - description: Pagination limit
+        in: query
+        name: limit
+        type: integer
+      - description: Pagination offset
+        in: query
+        name: offset
+        type: integer
+      - description: Email to search
+        in: query
+        name: email
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
           description: Lista de candidatos
           schema:
             $ref: '#/definitions/http.listCandidatoResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
         "404":
           description: Mensagem de erro
           schema:
@@ -106,7 +531,7 @@ paths:
         name: candidato
         required: true
         schema:
-          $ref: '#/definitions/http.candidatoDTO'
+          $ref: '#/definitions/http.createCandidatoDTO'
       produces:
       - application/json
       responses:
@@ -114,8 +539,20 @@ paths:
           description: Candidato criado
           schema:
             $ref: '#/definitions/http.candidatoDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
         "404":
           description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "409":
+          description: email already exists
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
           schema:
             $ref: '#/definitions/http.ErrorResponse'
       summary: Create candidato
@@ -137,11 +574,53 @@ paths:
           description: Candidato achado
           schema:
             $ref: '#/definitions/http.candidatoDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
         "404":
           description: Mensagem de error
           schema:
             $ref: '#/definitions/http.ErrorResponse'
       summary: Get Candidato By ID
+      tags:
+      - Candidatos
+    patch:
+      consumes:
+      - application/json
+      description: Patch candidato (partial update)
+      parameters:
+      - description: Candidato ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Dados de candidatos para atualizar parcialmente
+        in: body
+        name: candidato
+        required: true
+        schema:
+          $ref: '#/definitions/talenthub.CandidatoUpdate'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Candidato atualizado
+          schema:
+            $ref: '#/definitions/http.candidatoDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Patch candidato
       tags:
       - Candidatos
     put:
@@ -167,13 +646,44 @@ paths:
           description: Candidato atualizado
           schema:
             $ref: '#/definitions/http.candidatoDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
         "404":
           description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
           schema:
             $ref: '#/definitions/http.ErrorResponse'
       summary: Update candidato
       tags:
       - Candidatos
+  /rh_users:
+    get:
+      description: Lista RH Users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lista de usuários RH
+          schema:
+            items:
+              $ref: '#/definitions/http.rhUserDTO'
+            type: array
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Lista RH Users
+      tags:
+      - RH Users
   /vaga:
     get:
       description: Lista Vagas
@@ -193,6 +703,10 @@ paths:
           description: Lista de vagas
           schema:
             $ref: '#/definitions/http.listVagaResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
         "404":
           description: Mensagem de erro
           schema:
@@ -210,7 +724,7 @@ paths:
         name: candidato
         required: true
         schema:
-          $ref: '#/definitions/http.vagaDTO'
+          $ref: '#/definitions/http.createVagaDTO'
       produces:
       - application/json
       responses:
@@ -218,14 +732,44 @@ paths:
           description: Vaga criada
           schema:
             $ref: '#/definitions/http.vagaDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
         "404":
           description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "500":
+          description: Internal Error
           schema:
             $ref: '#/definitions/http.ErrorResponse'
       summary: Create vaga
       tags:
       - Vagas
   /vaga/{id}:
+    delete:
+      description: Delete vaga
+      parameters:
+      - description: Vaga ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: Vaga deleted
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Error message
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Delete vaga
+      tags:
+      - Vagas
     get:
       description: Get Vaga By ID
       parameters:
@@ -241,6 +785,10 @@ paths:
           description: Vaga achada
           schema:
             $ref: '#/definitions/http.vagaDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
         "404":
           description: Mensagem de error
           schema:
@@ -251,7 +799,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: Update candidato
+      description: Update vaga
       parameters:
       - description: Vaga ID
         in: path
@@ -271,11 +819,65 @@ paths:
           description: Vaga atualizada
           schema:
             $ref: '#/definitions/http.vagaDTO'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
         "404":
           description: Mensagem de erro
           schema:
             $ref: '#/definitions/http.ErrorResponse'
-      summary: Update candidato
+        "500":
+          description: Internal Error
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Update vaga
+      tags:
+      - Vagas
+  /vaga/close/{id}:
+    post:
+      description: Close vaga
+      parameters:
+      - description: Vaga ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: Vaga closed
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Close vaga
+      tags:
+      - Vagas
+  /vaga/open/{id}:
+    post:
+      description: Open vaga
+      parameters:
+      - description: Vaga ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: Vaga aberta
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+        "404":
+          description: Mensagem de erro
+          schema:
+            $ref: '#/definitions/http.ErrorResponse'
+      summary: Open vaga
       tags:
       - Vagas
 swagger: "2.0"

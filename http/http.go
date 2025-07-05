@@ -24,6 +24,7 @@ var codes = map[string]int{
 	talenthub.EINTERNAL:       http.StatusInternalServerError,
 	talenthub.ENOTFOUND:       http.StatusNotFound,
 	talenthub.ENOTIMPLEMENTED: http.StatusNotImplemented,
+	talenthub.ECONFLICT:       http.StatusConflict,
 }
 
 func ErrorStatusCode(code string) int {

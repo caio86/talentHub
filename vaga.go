@@ -6,22 +6,26 @@ import (
 )
 
 type Vaga struct {
-	ID          int    `json:"-"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	ID          int
+	Title       string
+	Description string
 
-	Open bool `json:"open"`
-	// Localidade
-	// Tipo
-	// AreaAtuação
+	IsActive bool
 
-	CreatedAt time.Time `json:"-"`
-	ExpiresAt time.Time `json:"-"`
+	Area         string
+	Type         string
+	Location     string
+	Requirements []string
+	Benefits     []string
+	Salary       *string
+	Company      string
+
+	Posted_date time.Time
 }
 
 func (v *Vaga) Validate() error {
-	if v.Name == "" {
-		return Errorf(EINVALID, "name required")
+	if v.Title == "" {
+		return Errorf(EINVALID, "title required")
 	}
 	if v.Description == "" {
 		return Errorf(EINVALID, "description required")
@@ -33,8 +37,9 @@ func (v *Vaga) Validate() error {
 type VagaService interface {
 	FindVagaByID(ctx context.Context, id int) (*Vaga, error)
 	FindVagas(ctx context.Context, filter VagaFilter) ([]*Vaga, int, error)
-	CreateVaga(ctx context.Context, vaga *Vaga) error
+	CreateVaga(ctx context.Context, vaga *Vaga) (*Vaga, error)
 	UpdateVaga(ctx context.Context, id int, upd VagaUpdate) (*Vaga, error)
+	DeleteVaga(ctx context.Context, id int) error
 	OpenVaga(ctx context.Context, id int) error
 	CloseVaga(ctx context.Context, id int) error
 }
@@ -47,7 +52,12 @@ type VagaFilter struct {
 }
 
 type VagaUpdate struct {
-	Name        string
-	Description string
-	Open        bool
+	Title       *string   `json:"title"`
+	Description *string   `json:"description"`
+	Area        *string   `json:"area"`
+	Type        *string   `json:"type"`
+	Location    *string   `json:"location"`
+	Benefits    *[]string `json:"benefits"`
+	Salary      *string   `json:"salary"`
+	Company     *string   `json:"company"`
 }
